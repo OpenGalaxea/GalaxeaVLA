@@ -19,9 +19,13 @@
 ## 📢 News
 
 [Jan 4, 2026] We are releasing **G0Plus**, our latest pre-trained VLA model for multi-task robot manipulation.
+
 [Oct 7, 2025] Now Lerobot Format Galaxea Open-World Dataset is available at [Huggingface](https://huggingface.co/datasets/OpenGalaxea/Galaxea-Open-World-Dataset)!
+
 [Sep 17, 2025] Release G0-VLA fine-tuning and real-robot inference code.
+
 [Sep 9, 2025] Release G0-VLA pretrained model weights. [Huggingface](https://huggingface.co/OpenGalaxea/G0-VLA) and [Modelscope](https://www.modelscope.cn/models/Galaxea/G0-VLA)!
+
 [Sep 9, 2025] Release Galaxea Open-World Dataset. [Huggingface](https://huggingface.co/datasets/OpenGalaxea/Galaxea-Open-World-Dataset) and [Modelscope](https://www.modelscope.cn/datasets/Galaxea/Galaxea-Open-World-Dataset)!
 
 
