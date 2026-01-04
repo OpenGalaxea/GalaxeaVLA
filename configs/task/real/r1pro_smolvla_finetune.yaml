@@ -1,0 +1,20 @@
+# @package _global_
+
+defaults:
+  - override /data: r1pro_eef/arm_torso
+  - override /model: vla/smolvla
+
+data:
+  dataset_dirs: 
+    - xx
+  shape_meta:
+    images:
+      - key: head_rgb
+        raw_shape: [3, 360, 640]
+        shape: [3, 512, 512]
+      - key: left_wrist_rgb
+        raw_shape: [3, 480, 640]
+        shape: [3, 512, 512]
+      - key: right_wrist_rgb
+        raw_shape: [3, 480, 640]
+        shape: [3, 512, 512]

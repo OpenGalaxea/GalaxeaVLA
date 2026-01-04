@@ -10,8 +10,35 @@
 [![Linkedin](https://img.shields.io/badge/Linkedin-5865F2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/company/galaxeadynamics/posts/?feedView=all&viewAsMember=true)
 [![Discord](https://img.shields.io/badge/Discord-1890FF?style=for-the-badge&logo=discord)](https://discord.gg/hB6BuUWZZA)
 
+<div align="left">
+  <img src="assets/r1_mascot.jpeg" alt="mascot" style="height: 160px; margin-right: 0px;">
+  <img src="assets/g0plus_logo.png" alt="logo" style="height: 110px;">
+</div>
 
 
+## 📢 News
+
+[Jan 4, 2026] We are releasing **G0Plus**, our latest pre-trained VLA model for multi-task robot manipulation.
+
+## 📌 Overview
+
+**GalaxeaVLA** is an open-source project dedicated to advancing real-world, long-horizon, and few-shot robot manipulation.
+
+1. **Galaxea Open-World Dataset**
+   - **500+ hours** of real-world mobile manipulation data.
+   - All data collected using **one uniform robotic embodiment** for consistency.
+   - Fine-grained **subtask language annotations**.
+   - Covers **residential**, **kitchen**, **retail**, and **office** settings.
+   - Dataset in **RLDS** format.
+
+2. **Easy-to-Use Fine-Tuning Framework**
+   - Fully compatible with the [LeRobot](https://github.com/huggingface/lerobot) dataset format and scalable to large, real-world datasets.
+   - Modular design enables easy extension and adaptation for new tasks and environments.
+
+3. **Model Checkpoints & An Out-of-the-Box Demo!**  
+   - **G0Plus_3B_base**: A powerful pre-trained model with **2k hours+** real-world robot data for fine-tuning on custom tasks.
+   - **G0Plus_3B_base-pick_and_place**: A deployment-ready checkpoint, post-trained for robust pick-and-place performance in the wild.
+   - **Out-of-the-Box Pick Up Anything Demo**: a Dockerfile and step-by-step guides for quick setup and reproducible experiments.
 
 
 ## ⏰ Roadmap / Release Timeline
@@ -35,24 +62,13 @@ We are gradually open-sourcing the dataset and model. Progress will be updated h
 - [x] **Oct 7, 2025**  
   - Now Lerobot Format Galaxea Open-World Dataset is available at [Huggingface](https://huggingface.co/datasets/OpenGalaxea/Galaxea-Open-World-Dataset)!
 
-- [ ] **Later in 2025**  
+- [x] **Dec 29, 2025**  
+  - Enhaced the traning framework, fully supported [LeRobot](https://github.com/huggingface/lerobot) dataset format.
+  - Added **G0Plus_3B_base**, a pre-trained model with **2k hours+** of real-world robot data.
+  - Added **G0Plus_3B_base-pick_and_place**, our latest post-trained model for pick-and-place deployment in the wild.
+
+- [ ] **Early in 2026**  
   - 🔮 More updates to come (extended datasets, improved models, additional tools).
-
-
-## 📌 Overview
-
-We introduce **Galaxea Open-World Dataset**, a large-scale, high-quality robot behavior dataset collected in **authentic human living and working environments**.  
-We also present **G0**, a **dual-system VLA** model that combines:
-
-- **G0-VLM**: a multimodal planner for high-level reasoning and subtask planning.  
-- **G0-VLA**: a real-time executor for precise low-level action control.
-
-The dataset and model are designed to **advance real-world, long-horizon, and few-shot robotic manipulation**.
-
-<p align="center">
-  <img src="assets/teaser.png" alt="Galaxea Dataset & G0 Dual-System Overview" width="700"/>
-</p>
-
 
 
 ## 🚀 Galaxea Open-World Dataset
@@ -63,75 +79,106 @@ The dataset and model are designed to **advance real-world, long-horizon, and fe
 - All data collected using **one uniform robotic embodiment** for consistency.
 - Fine-grained **subtask language annotations**.
 - Covers **residential**, **kitchen**, **retail**, and **office** settings.
-- Dataset in **RLDS** format.
+- Dataset in **RLDS** and **LeRobot** format.
 
 See more dataset (formats and examples) details [here](docs/dataset.md).
 
-## G0-VLA
+## ⚙️ GalaxeaVLA Getting Started
 
-#### GPU Requirements
+### GPU Requirements
 
 To run our pretrained models in this repository, you will need an NVIDIA GPU with at least the following specifications. These estimations assume a single GPU, but you can also use multiple GPUs with model parallelism to reduce per-GPU memory requirements by configuring `--nnodes` and`--nproc-per-node` in the fine-tune start shell script. 
 
 | Mode               | Memory Required | Example GPU              |
 | ------------------ | --------------- | ------------------------ |
-| Inference          | > 8 GB          | RTX 3090 / RTX 4090      |
+| Inference          | > 8 GB          | RTX 3090 / **RTX 4090 (Recommended)**      |
 | Fine-Tuning (Full) | > 70 GB         | A100 (80GB) / H20 (96GB) |
 
-#### Installation
+### Installation
 
+```bash
+git clone https://github.com/OpenGalaxea/GalaxeaVLA
+cd GalaxeaVLA
+uv sync --index-strategy unsafe-best-match
+source .venv/bin/activate
+
+uv pip install -e .
+uv pip install -e .[dev]
 ```
-git clone https://github.com/OpenGalaxea/G0
-conda env create -f glx_vla.yml
-conda activate g0
+Note that before you run the installation:
+1. recommend to [install uv](https://docs.astral.sh/uv/getting-started/installation/) without using a conda environment.
+2. recommend to add env variables at the beginning of your terminal, if you are in the country:
+   ```bash
+   export UV_DEFAULT_INDEX=https://mirrors.aliyun.com/pypi/simple/
+   export UV_PYTHON_INSTALL_MIRROR=https://gh-proxy.com/https://github.com/astral-sh/python-build-standalone/releases/download
+   ```
 
-# Install Pacakges from Code
-git clone https://github.com/kvablack/dlimp
-cd dlimp
-pip install -e .
-```
 
-#### Model Checkpoints
+### Model Checkpoints
 
 | Model                  | Use Case    | Description                       | Checkpoint Path                                              |
 | ---------------------- | ----------- | --------------------------------- | ------------------------------------------------------------ |
 | G0_3B_base              | Fine-Tuning | Base G0-VLA Model for fine-tuning | https://huggingface.co/OpenGalaxea/G0-VLA/blob/main/G0_3B_base.pt |
+| G0Plus_3B_base              | Fine-Tuning | Base G0Plus-VLA Model for fine-tuning | https://huggingface.co/OpenGalaxea/G0-VLA/tree/main/G0Plus_3B_base |
+| G0Plus_3B_base-pick_and_place | Deployment | Pick-and-Place Demo in the Wild | https://huggingface.co/OpenGalaxea/G0-VLA/tree/main/G0Plus_3B_base-pick_and_place |
 | More Models come soon! |             |                                   |                                                              |
 
-#### Fine-Tuning Base Models on Galaxea R1Lite Robot
+### 🔥 Fine-Tuning Base Models on Galaxea R1Lite Robot
 
-To fine-tune our model with your own data, you should follow three steps:
+To fine-tune our models with your own data, you should follow three steps:
 
-1. Convert your data to a RLDS dataset. You can follow data converter open-sourced by  [OpenVLA](https://github.com/moojink/rlds_dataset_builder).
+1. Create your own task configs in `configs/tasks/real/`. You can adapt it from our [configs demo](configs/task/real/r1lite_g0plus_finetune_demo.yaml).
 
-2. Defining training configs and running training:
+2. Install the required packages
 
-   **Defining Training Configs**
-
-   You can find a training config template at `vla/config/r1_lite/r1lite_fine_tune_example.yml`
-
-   **Running Training**
-
+   ```bash
+   sudo apt install ffmpeg
    ```
-   cd G0
-   conda activate g0
+
+3. Set your environment variables
+    - `HF_DATASETS_CACHE`: An empty directory for HF-related caches.
+    - `GALAXEA_FM_OUTPUT_DIR`: An empty directory for checkpoints and logs output.
+    - `SWANLAB_API_KEY`: Your SwanLab API key.
+    
+    ```bash
+    export HF_ENDPOINT=https://hf-mirror.com
+    export HF_DATASETS_CACHE=<YOUR_HF_CACHE_PATH>
+    export GALAXEA_FM_OUTPUT_DIR=<YOUR_OUTPUT_DIR>
+    export SWANLAB_API_KEY=<YOUR_SWANLAB_API_KEY>
+    ```
+
+4. Running fine-tuning
+
+   ```bash
+   bash scripts/run/finetune.sh <num_of_gpu> <task_path>
+ 
+   # example:
+   bash scripts/run/finetune.sh 8 real/r1lite_g0plus_finetune_demo
+   ```
+
+#### FAQs of Fine-tuning
+
+1. Q: How to convert my data to a [LeRobot](https://github.com/huggingface/lerobot) dataset? 
+
+   A: The [demo datasets](https://huggingface.co/OpenGalaxea/G0-VLA/tree/main/G0Plus_Finetune_LeRobot_Datasets_Demo) are provided on HuggingFace for easy trying.
+
+2. Q: Cannot view the training logs in the SwanLab? 
    
-   # For Single Nodes Post-Training
-   torchrun \
-       --standalone \
-       --nnodes 1 \
-       --nproc-per-node <num-gpus> \
-       finetune.py --config <your-training-config-path>
+   A: Make sure you set your own swanlab `workspace` in [train.yaml](configs/train.yaml).
 
-3. Running Inference in with real world with Galaxea R1Lite Robot **(ROS1)**
+3. Q: Cannot find the pre-trained model? 
 
-   See detailed commands and launch methods [here](docs/inference.md).
+   A: We use `google/paligemma-3b-pt-224` as the pre-trained model, you should modify it twice in [g0plus.yaml](configs/model/vla/g0plus.yaml) the same as your actual path (default: `/data/google/paligemma-3b-pt-224`).
 
+4. Q: Out of Memory (OOM) error? 
 
-#### Precision
+   A: Make sure you have enough GPU memory as mentioned above. Or, reduce the `batch_size` in [g0plus.yaml](configs/model/vla/g0plus.yaml) (default: `4`).
 
-1. Inference: Support either BF16 or FP32. You can change data type by specifying `dtype` parameter while launching inference.
-2. Training: Support either BF16 or FP32. You can enable BF16 by setting `enable_bf16: True` in the training config file. Our open-sourced pretrained weight is trained with BF16.
+### 🔥🔥 Out-of-the-Box Pick Up Anything Demo
+
+We provide you with a [detailed user guide]((docs/pick_up_anything_user_guideline.md)) for setting up and running the Pick Up Anything Demo from scratch. 
+
+Feel free to raise an issue if you have any questions.
 
 ## Troubleshooting
 
@@ -140,7 +187,7 @@ We will collect common issues and their solutions here. If you encounter an issu
 |     Issue     |                          Resolution                          |
 | :-----------: | :----------------------------------------------------------: |
 | About dataset | Step in our dataset is 15 HZ, and image resolution in RLDS is 224 x 224. But the lerobot format dataset with full resolution (1280 x 720) will come soon. |
-| Action dimension and Proprios dimension             |  Refer to [Huggingface](https://huggingface.co/datasets/OpenGalaxea/Galaxea-Open-World-Dataset/discussions/6.)                                                            |
+|               |                                                              |
 |               |                                                              |
 
 

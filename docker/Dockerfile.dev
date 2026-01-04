@@ -1,0 +1,81 @@
+ARG CUDA_VERSION=12.4.1
+ARG OS_VERSION=22.04
+
+FROM nvcr.io/nvidia/cuda:${CUDA_VERSION}-cudnn-devel-ubuntu${OS_VERSION}
+LABEL maintainer="NVIDIA CORPORATION"
+
+SHELL ["/bin/bash", "-c"]
+
+# Required to build Ubuntu 20.04 without user prompts with DLFW container
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update CUDA signing key
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
+
+# Install requried libraries
+RUN sed -i 's|http://[a-z]*.ubuntu.com/ubuntu/|http://mirrors.aliyun.com/ubuntu/|g' /etc/apt/sources.list
+RUN apt-get update && apt-get install -y software-properties-common
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libcurl4-openssl-dev \
+    wget \
+    git \
+    pkg-config \
+    sudo \
+    ssh \
+    libssl-dev \
+    pbzip2 \
+    pv \
+    bzip2 \
+    unzip \
+    devscripts \
+    lintian \
+    fakeroot \
+    dh-make \
+    libgl1-mesa-glx \
+    cmake \
+    curl \
+    build-essential \
+    ffmpeg
+
+# Install python3
+RUN apt-get install -y --no-install-recommends \
+      python3 \
+      python3-pip \
+      python3-dev \
+      python3-wheel && \
+    cd /usr/local/bin && \
+    ln -s /usr/bin/python3 python && \
+    ln -s /usr/bin/pip3 pip;
+
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
+# Install PyPI packages
+RUN pip3 install --upgrade pip
+RUN pip3 install setuptools>=41.0.0
+RUN pip3 install uv
+RUN pip3 install requests
+
+# Prepare GalaxeaFM
+ENV HF_ENDPOINT=https://hf-mirror.com
+ENV UV_DEFAULT_INDEX=https://mirrors.aliyun.com/pypi/simple/
+ENV UV_PYTHON_INSTALL_MIRROR=https://gh-proxy.com/https://github.com/astral-sh/python-build-standalone/releases/download
+
+RUN mkdir -p /workspace
+WORKDIR /workspace
+
+RUN cd /workspace && \
+    git clone https://cnb:<CNB>@cnb.cool/galaxea.ai/FoundationModel/GalaxeaLeRobot
+
+RUN cd /workspace && \
+    git clone https://cnb:<CNB>@cnb.cool/galaxea.ai/FoundationModel/GalaxeaManipSim
+
+RUN cd /workspace && \
+    git clone https://cnb:<CNB>@cnb.cool/galaxea.ai/FoundationModel/Galaxea0 -b dev/galaxea_fm && \
+    cd Galaxea0 && \
+    uv sync --index-strategy unsafe-best-match
+
+RUN cd /workspace/Galaxea0 && \
+    uv pip install -e . && \
+    uv pip install -e .[dev] && \
+    uv pip install --no-deps -e ../GalaxeaLeRobot && \
+    uv pip install --no-deps -e ../GalaxeaManipSim

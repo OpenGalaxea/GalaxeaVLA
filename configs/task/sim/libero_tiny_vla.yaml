@@ -1,0 +1,91 @@
+# @package _global_
+
+defaults:
+  - override /data: libero/default
+  - override /model: vla/vla_tiny
+
+data:
+  dataset_dirs:
+    - /mnt/dataset/libero_lerobot/libero_10_no_noops
+    - /mnt/dataset/libero_lerobot/libero_goal_no_noops
+    - /mnt/dataset/libero_lerobot/libero_object_no_noops
+    - /mnt/dataset/libero_lerobot/libero_spatial_no_noops
+
+  shape_meta:
+    action:
+      - key: default
+        raw_shape: 7
+        shape: 7
+    
+    state:
+      - key: default
+        raw_shape: 8
+        shape: 8
+    
+    images:
+      - key: image
+        raw_shape: [3, 256, 256]
+        shape: [3, 512, 512]
+      - key: wrist_image
+        raw_shape: [3, 256, 256]
+        shape: [3, 512, 512]
+
+ckpt_path: xx.pt
+
+model:
+  batch_size: 24
+  num_workers: 8
+  max_epochs: 8
+  max_steps: null
+  learning_rate: 6e-5
+  weight_decay: 1e-3
+  warmup_steps: 480
+  betas: [0.9, 0.95]
+  use_pretrained_norm_stats: false
+  find_unused_parameters: true
+
+  model_arch:
+    backbone_lr_multiplier: 0.1
+    action_dim: 7
+    proprio_dim: 8
+  
+  processor:
+    train_transforms:
+      image:
+        - _target_: torchvision.transforms.Resize
+          size: [512, 512]
+        - _target_: galaxea_fm.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Normalize
+          mean: [0.5, 0.5, 0.5]
+          std: [0.5, 0.5, 0.5]
+      wrist_image:
+        - _target_: torchvision.transforms.Resize
+          size: [512, 512]
+        - _target_: galaxea_fm.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Normalize
+          mean: [0.5, 0.5, 0.5]
+          std: [0.5, 0.5, 0.5]
+
+    val_transforms: 
+      image:
+        - _target_: torchvision.transforms.Resize
+          size: [512, 512]
+        - _target_: galaxea_fm.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Normalize
+          mean: [0.5, 0.5, 0.5]
+          std: [0.5, 0.5, 0.5]
+      wrist_image:
+        - _target_: torchvision.transforms.Resize
+          size: [512, 512]
+        - _target_: galaxea_fm.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Normalize
+          mean: [0.5, 0.5, 0.5]
+          std: [0.5, 0.5, 0.5]
+
+
+checkpointing_steps: 10000
+
+libero:
+  task_suite_name: libero_10
+  num_trials_per_task: 50
+  num_steps_wait: 10

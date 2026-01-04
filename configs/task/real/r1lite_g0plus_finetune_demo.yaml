@@ -1,0 +1,13 @@
+# @package _global_
+
+defaults:
+  - override /data: r1lite/arm_torso_velocity_chassis
+  - override /model: vla/g0plus
+
+model:
+  pretrained_ckpt: /TO/Your/Path/G0Plus_3B_base/checkpoints/g0plus_2k_hours_20251213.pt
+
+data:
+  dataset_dirs: 
+    - /TO/Your/Path/BENCH_Pick_And_Place_20_Items16_Evenly_Distributed_Round_13_20251022_018
+    - /TO/Your/Path/BENCH_Pick_And_Place_20_Items57_Evenly_Distributed_Round_13_20251024_018

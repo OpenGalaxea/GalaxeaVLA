@@ -1,0 +1,217 @@
+pretrained_ckpt: null
+use_pretrained_norm_stats: False
+
+# strategy
+model_weights_to_bf16: False
+enable_bf16_training: True
+use_torch_compile: False
+find_unused_parameters: True
+
+# dataloader
+batch_size: 32
+num_workers: 8
+pin_memory: True
+persistent_workers: True
+
+# training period
+max_epochs: 8
+max_steps: null
+grad_accumulation_steps: 1
+
+# optimizer
+use_8bit_optimizer: False # AdamW8bit or AdamW
+learning_rate: 6e-5
+weight_decay: 1e-3
+betas: [0.9, 0.95]
+
+# LR scheduler
+lr_scheduler_type: "cosine" # following openpi
+warmup_steps: 480
+
+max_grad_norm: 1.0
+
+# EMA
+use_ema: False
+ema: 
+  update_after_step: 0 # Step after which to update EMA weights
+  power: 0.67
+
+# sync batch normalization
+use_sync_bn: False
+
+processor:
+  _target_: galaxea_fm.processors.vla_tiny_processor.VLATinyProcessor
+
+  shape_meta: ${data.shape_meta}
+  num_obs_steps: ${data.obs_size}
+
+  # action & state transform
+  action_state_transforms:
+    - _target_: galaxea_fm.transforms.relative_action.RelativePoseTransform
+      keys: [left_ee_pose, right_ee_pose]
+    - _target_: galaxea_fm.transforms.relative_action.RelativeJointTransform
+      keys: [torso]
+    - _target_: galaxea_fm.transforms.rotation.PoseRotationTransform
+      rotation_type: rotation_6d
+      category_keys:
+        action: [left_ee_pose, right_ee_pose]
+        state: [left_ee_pose, right_ee_pose]
+  
+
+  # action & state normalization
+  use_stepwise_action_norm: True
+  norm_default_mode: "min/max"
+  norm_exception_mode:
+    action:
+      left_gripper: "0/100"
+      right_gripper: "0/100"
+  
+  action_state_merger: 
+    _target_: galaxea_fm.transforms.action_state_merger.ConcatLeftAlign
+
+  # image transform
+  train_transforms:
+    head_rgb:
+      - _target_: torchvision.transforms.Resize
+        size: [512, 512]
+      - _target_: galaxea_fm.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Normalize
+        mean: [0.5, 0.5, 0.5]
+        std: [0.5, 0.5, 0.5]
+    left_wrist_rgb:
+      - _target_: torchvision.transforms.Resize
+        size: [512, 512]
+      - _target_: galaxea_fm.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Normalize
+        mean: [0.5, 0.5, 0.5]
+        std: [0.5, 0.5, 0.5]
+    right_wrist_rgb:
+      - _target_: torchvision.transforms.Resize
+        size: [512, 512]
+      - _target_: galaxea_fm.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Normalize
+        mean: [0.5, 0.5, 0.5]
+        std: [0.5, 0.5, 0.5]
+
+  val_transforms: 
+    head_rgb:
+      - _target_: torchvision.transforms.Resize
+        size: [512, 512]
+      - _target_: galaxea_fm.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Normalize
+        mean: [0.5, 0.5, 0.5]
+        std: [0.5, 0.5, 0.5]
+    left_wrist_rgb:
+      - _target_: torchvision.transforms.Resize
+        size: [512, 512]
+      - _target_: galaxea_fm.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Normalize
+        mean: [0.5, 0.5, 0.5]
+        std: [0.5, 0.5, 0.5]
+    right_wrist_rgb:
+      - _target_: torchvision.transforms.Resize
+        size: [512, 512]
+      - _target_: galaxea_fm.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Normalize
+        mean: [0.5, 0.5, 0.5]
+        std: [0.5, 0.5, 0.5]
+  
+  num_output_cameras: 3
+
+  # instruction
+  drop_high_level_prob: 1.0
+  use_zh_instruction: False
+
+  # tokenization
+  pad_token_id: ${model.model_arch.pad_token_id}
+  image_token_index: ${model.model_arch.image_token_index}
+  global_image_token_index: ${model.model_arch.global_image_token_index}
+  fake_token_around_image_token_index: ${model.model_arch.fake_token_around_image_token_index}
+  tokenizer_params: 
+    pretrained_model_name_or_path: /mnt/pretrained_models/smolvlm2-500m-video-instruct
+    local_files_only: False
+    token: null                 # fill in the token if you access gated repo, default to None
+
+  max_text_tokens: ${model.model_arch.max_text_tokens}
+  max_image_text_tokens: ${model.model_arch.max_image_text_tokens}
+  num_input_cameras: ${model.model_arch.num_input_images}
+  num_image_tokens_per_camera: ${model.model_arch.vision.num_image_tokens}
+
+model_arch:
+  _target_: galaxea_fm.models.vla_tiny.galaxea_vla_policy.GalaxeaVLAPolicy
+
+  pretrained_model_path: /mnt/pretrained_models/smolvlm2-500m-video-instruct
+  vla_training_strategy: "vla-full-train" # training both vision and language
+  backbone_lr_multiplier: 0.1
+  image_token_index: 49190
+  global_image_token_index: 49152
+  fake_token_around_image_token_index: 49189
+  pad_token_id: 2
+  vocab_size: 49280
+
+  cond_steps: 1 # len proprio
+  horizon_steps: 32
+  max_text_tokens: 55 # following g0
+  num_input_images: ${eval:'${model.model_arch.cond_steps} * ${model.model_arch.vision.num_channels}'} # $data.window_size * LEN($data.camera_views)
+  max_image_text_tokens: ${eval:'${model.model_arch.num_input_images} * (${model.model_arch.vision.num_image_tokens} + 3) + ${model.model_arch.max_text_tokens}'} # + 3: 1 for <global-img>, 2 for <fake_token_around_image>
+  final_action_clip_value: null  # data normalized in [-1,1]
+
+  action_dim: 24 # 2 x [QPOS_6D (9) + gripper (1)] + Torso (4)
+  proprio_dim: 24  # 2 x [QPOS_6D (9) + gripper (1)] + Torso (4)
+  action_decoder_layers: 2
+  action_expert_adaptive_mode: null
+
+  flow_sampling: beta
+  num_inference_steps: 10
+
+  vision:
+    hidden_size: 768 # siglip
+    intermediate_size: 3072
+    num_hidden_layers: 12
+    num_attention_heads: 12
+    num_channels: 3
+    image_size: 512
+    patch_size: 16
+    layer_norm_eps: 1e-6
+    attention_dropout: 0.0
+    num_image_tokens: 64
+
+  vision_projector:
+    vision_config:
+      scale_factor: 4
+      hidden_size: 768
+      projection_dim: ${model.model_arch.joint.mixture.vlm.hidden_size}
+    text_config:
+      hidden_size: ${model.model_arch.joint.mixture.vlm.hidden_size}
+    
+  joint:
+    mixture:
+      vlm:
+        hidden_size: 960
+        intermediate_size: 2560
+        use_final_norm: True
+        cache: True
+      proprio:
+        hidden_size: 720
+        intermediate_size: 2048
+        use_final_norm: True  # technically no, but sharing weights with action anyway
+        cache: True
+        adaptive_mode: null
+      action:
+        hidden_size: 720
+        intermediate_size: 2048
+        use_final_norm: True
+        cache: False
+        adaptive_mode: null
+
+    time_hidden_size: 256 # only applicable if using adaptive
+    num_hidden_layers: 16
+    num_attention_heads: 15
+    num_key_value_heads: 5
+    head_dim: 64
+    max_position_embeddings: 8192
+    rms_norm_eps: 1.0e-05
+    rope_theta: 100000.0
+    attention_bias: False
+    mlp_bias: False
+    attention_dropout: 0.0

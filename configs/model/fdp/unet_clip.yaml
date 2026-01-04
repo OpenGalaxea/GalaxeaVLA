@@ -1,0 +1,214 @@
+pretrained_ckpt: null
+use_pretrained_norm_stats: True
+
+# strategy
+model_weights_to_bf16: False
+enable_bf16_training: False
+use_torch_compile: False
+find_unused_parameters: False
+
+# dataloader
+batch_size: 90
+num_workers: 16
+pin_memory: True
+persistent_workers: True
+
+# training period
+max_epochs: null
+max_steps: 20000
+grad_accumulation_steps: 1
+
+# optimizer
+use_8bit_optimizer: False # AdamW8bit or AdamW
+learning_rate: 4e-5
+weight_decay: 1e-4
+betas: [0.9, 0.95]
+
+# LR scheduler
+lr_scheduler_type: "OneCycleLR"
+warmup_steps: 5000
+pct_start: 0.25
+anneal_strategy: 'cos'
+div_factor: 100.0
+final_div_factor: 1000.0
+
+max_grad_norm: 0.5
+
+# EMA
+use_ema: False
+ema: 
+  update_after_step: 0 # Step after which to update EMA weights
+  power: 0.67
+
+# sync batch normalization
+use_sync_bn: True
+
+processor:
+  _target_: galaxea_fm.processors.base_processor.BaseProcessor
+
+  shape_meta: ${data.shape_meta}
+  num_obs_steps: ${data.obs_size}
+
+  # action & state transform
+  action_state_transforms:
+    - _target_: galaxea_fm.transforms.relative_action.RelativePoseTransform
+      keys: [left_ee_pose, right_ee_pose]
+    - _target_: galaxea_fm.transforms.relative_action.RelativeJointTransform
+      keys: [torso]
+    - _target_: galaxea_fm.transforms.rotation.PoseRotationTransform
+      rotation_type: rotation_6d
+      category_keys:
+        action: [left_ee_pose, right_ee_pose]
+        state: [left_ee_pose, right_ee_pose]
+
+  # action & state normalization
+  use_stepwise_action_norm: True
+  norm_default_mode: "min/max"
+  norm_exception_mode: null
+
+  action_state_merger: 
+    _target_: galaxea_fm.transforms.action_state_merger.ConcatLeftAlign
+
+  train_transforms:
+    head_rgb:
+      - _target_: galaxea_fm.transforms.image.Pad
+        padding: [0, 140, 0, 140]
+        padding_mode: edge
+      - _target_: torchvision.transforms.Resize
+        size: [238, 238]
+      - _target_: torchvision.transforms.RandomCrop
+        size: [224, 224]
+      - _target_: torchvision.transforms.ColorJitter
+        brightness: 0.3
+        contrast: 0.4
+        saturation: 0.5
+        hue: 0.3
+      - _target_: galaxea_fm.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Normalize
+        mean: [0.48145466, 0.4578275, 0.40821073]
+        std: [0.26862954, 0.26130258, 0.27577711]
+    left_wrist_rgb:
+      - _target_: galaxea_fm.transforms.image.Pad
+        padding: [0, 80, 0, 80]
+        padding_mode: edge
+      - _target_: torchvision.transforms.Resize
+        size: [238, 238]
+      - _target_: torchvision.transforms.RandomCrop
+        size: [224, 224]
+      - _target_: torchvision.transforms.ColorJitter
+        brightness: 0.3
+        contrast: 0.4
+        saturation: 0.5
+        hue: 0.3
+      - _target_: galaxea_fm.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Normalize
+        mean: [0.48145466, 0.4578275, 0.40821073]
+        std: [0.26862954, 0.26130258, 0.27577711]
+    right_wrist_rgb:
+      - _target_: galaxea_fm.transforms.image.Pad
+        padding: [0, 80, 0, 80]
+        padding_mode: edge
+      - _target_: torchvision.transforms.Resize
+        size: [238, 238]
+      - _target_: torchvision.transforms.RandomCrop
+        size: [224, 224]
+      - _target_: torchvision.transforms.ColorJitter
+        brightness: 0.3
+        contrast: 0.4
+        saturation: 0.5
+        hue: 0.3
+      - _target_: galaxea_fm.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Normalize
+        mean: [0.48145466, 0.4578275, 0.40821073]
+        std: [0.26862954, 0.26130258, 0.27577711]
+
+  val_transforms:
+    head_rgb:
+      - _target_: galaxea_fm.transforms.image.Pad
+        padding: [0, 140, 0, 140]
+        padding_mode: edge
+      - _target_: torchvision.transforms.Resize
+        size: [238, 238]
+      - _target_: torchvision.transforms.CenterCrop
+        size: [224, 224]
+      - _target_: galaxea_fm.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Normalize
+        mean: [0.48145466, 0.4578275, 0.40821073]
+        std: [0.26862954, 0.26130258, 0.27577711]
+    left_wrist_rgb:
+      - _target_: galaxea_fm.transforms.image.Pad
+        padding: [0, 80, 0, 80]
+        padding_mode: edge
+      - _target_: torchvision.transforms.Resize
+        size: [238, 238]
+      - _target_: torchvision.transforms.CenterCrop
+        size: [224, 224]
+      - _target_: galaxea_fm.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Normalize
+        mean: [0.48145466, 0.4578275, 0.40821073]
+        std: [0.26862954, 0.26130258, 0.27577711]
+    right_wrist_rgb:
+      - _target_: galaxea_fm.transforms.image.Pad
+        padding: [0, 80, 0, 80]
+        padding_mode: edge
+      - _target_: torchvision.transforms.Resize
+        size: [238, 238]
+      - _target_: torchvision.transforms.CenterCrop
+        size: [224, 224]
+      - _target_: galaxea_fm.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Normalize
+        mean: [0.48145466, 0.4578275, 0.40821073]
+        std: [0.26862954, 0.26130258, 0.27577711]
+  num_output_cameras: 3
+  
+  drop_high_level_prob: 1.0
+  use_zh_instruction: False
+
+
+model_arch:
+  _target_: galaxea_fm.models.fdp.unet_policy.DiffusionUnetImagePolicy
+
+  shape_meta: ${data.shape_meta}
+
+  noise_scheduler:
+    _target_: diffusers.schedulers.scheduling_ddpm.DDPMScheduler
+    beta_end: 0.02
+    beta_schedule: squaredcos_cap_v2
+    beta_start: 0.0001
+    clip_sample: true
+    num_train_timesteps: 20
+    prediction_type: epsilon
+    variance_type: fixed_small
+
+  obs_encoder:
+    _target_: galaxea_fm.models.fdp.obs_encoder.ObsEncoder
+    shape_meta: ${model.model_arch.shape_meta}
+    obs_step: ${data.obs_size}
+    encoder_model_name: vit_base_patch16_clip_224.openai
+    share_encoder: False
+    vit_img_shape: 224
+    pretrained: True
+    state_mlp_size: [64, 128, 256]
+    additional_convs_channel: [128, 64, 32]
+    additional_convs_kernel_size: [3, 3, 3]
+    additional_convs_stride: [1, 1, 1]
+    additional_convs_padding: [1, 1, 1]
+    fusion_mlp_size: [2048, 1024, 1024, 512]
+    frozen: False
+    use_task_id: False
+    num_tasks: 9         
+    task_emb_dim: 512      
+    task_id_key: "task_id"
+
+  horizon: ${data.action_size}
+  obs_steps: ${data.obs_size}
+  num_inference_steps: 20
+  diffusion_step_embed_dim: 128
+  down_dims: [512, 1024, 2048]
+  kernel_size: 5
+  n_groups: 8
+  condition_type: film
+  use_down_condition: True
+  use_mid_condition: True
+  use_up_condition: True
+  vision_encoder_lr_scale: 0.1

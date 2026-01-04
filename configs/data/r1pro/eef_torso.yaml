@@ -1,0 +1,57 @@
+_target_: galaxea_fm.data.galaxea_lerobot_dataset.GalaxeaLerobotDataset
+
+dataset_dirs: null
+
+shape_meta:
+  action:
+    - key: left_ee_pose
+      raw_shape: 7
+      shape: 9
+    - key: left_gripper
+      raw_shape: 1
+      shape: 1
+    - key: right_ee_pose
+      raw_shape: 7
+      shape: 9
+    - key: right_gripper
+      raw_shape: 1
+      shape: 1
+    - key: torso
+      raw_shape: 4
+      shape: 4
+
+  state:
+    - key: left_ee_pose
+      raw_shape: 7
+      shape: 9
+    - key: left_gripper
+      raw_shape: 1
+      shape: 1
+    - key: right_ee_pose
+      raw_shape: 7
+      shape: 9
+    - key: right_gripper
+      raw_shape: 1
+      shape: 1
+    - key: torso
+      raw_shape: 4
+      shape: 4
+  
+  images:
+    - key: head_rgb
+      raw_shape: [3, 360, 640]
+      shape: [3, 224, 224]
+    - key: left_wrist_rgb
+      raw_shape: [3, 480, 640]
+      shape: [3, 224, 224]
+    - key: right_wrist_rgb
+      raw_shape: [3, 480, 640]
+      shape: [3, 224, 224]
+
+action_size: 32
+past_action_size: 0
+obs_size: 1
+
+ee_start_moving_thresh: 0.002
+
+val_set_proportion: 0.05

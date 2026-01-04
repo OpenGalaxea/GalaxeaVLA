@@ -1,0 +1,9 @@
+# @package _global_
+
+defaults:
+  - override /data: r1lite/arm_torso_velocity_chassis
+  - override /model: vla/g0plus
+
+data:
+  dataset_dirs: 
+    - null

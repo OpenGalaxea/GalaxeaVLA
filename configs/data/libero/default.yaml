@@ -1,0 +1,30 @@
+_target_: galaxea_fm.data.libero_lerobot_dataset.LiberoLerobotDataset
+
+# dataset configuration
+dataset_dirs: null
+
+# data shape configuration
+shape_meta:
+  action:
+    - key: default
+      raw_shape: 7
+      shape: 7
+  
+  state:
+    - key: default
+      raw_shape: 8
+      shape: 8
+  
+  images:
+    - key: image
+      raw_shape: [3, 256, 256]
+      shape: [3, 224, 224]
+    - key: wrist_image
+      raw_shape: [3, 256, 256]
+      shape: [3, 224, 224]
+
+action_size: 32
+past_action_size: 0
+obs_size: 1
+
+val_set_proportion: 0.05

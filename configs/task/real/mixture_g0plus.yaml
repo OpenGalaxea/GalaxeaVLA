@@ -1,0 +1,35 @@
+# @package _global_
+
+defaults:
+  - override /data: mixture/r1lite_r1pro_libero
+  - override /model: vla/g0plus_mixture
+
+data:
+  embodiment_datasets:
+    r1lite:
+      dataset_groups:
+        # - weight: 
+        #   dataset_dirs:
+        #     - 
+        #     - 
+        # - weight:
+        #   dataset_dirs:
+        #     - 
+        #     -
+    r1pro:
+      dataset_groups:
+        # - weight: 
+        #   dataset_dirs:
+        #     - 
+        #     - 
+    libero:
+      dataset_groups:
+        # - weight: 
+        #   dataset_dirs:
+        #     - 
+        #     - 
+        #     - 
+        #     - 
+
+model:
+  use_pretrained_norm_stats: False # just load pretrained G0plus weights

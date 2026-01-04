@@ -1,0 +1,29 @@
+_target_: galaxea_fm.data.mixture_lerobot_dataset.MixtureLerobotDataset
+
+embodiment_datasets:
+  r1lite:
+    type: GalaxeaLerobotDataset
+    dataset_groups:
+    shape_meta: ${oc.load:configs/data/r1lite/arm_torso_velocity_chassis.yaml,shape_meta}
+    ee_start_moving_thresh: 0.0
+  
+  r1pro:
+    type: GalaxeaLerobotDataset
+    dataset_groups:
+    shape_meta: ${oc.load:configs/data/r1pro/eef_torso.yaml,shape_meta}
+    ee_start_moving_thresh: 0.0 # DEBUG: out of bound error
+
+  libero:
+    type: LiberoLerobotDataset
+    dataset_groups:
+    shape_meta: ${oc.load:configs/data/libero/default.yaml,shape_meta}
+
+# Make the mixed dataset length equal to the sum of lengths of its constituent datasets
+use_weight_normalization: True
+
+action_size: 32
+past_action_size: 0
+obs_size: 1
+
+val_set_proportion: 0.05
+is_training_set: True

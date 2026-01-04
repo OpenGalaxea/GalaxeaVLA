@@ -1,0 +1,66 @@
+# @package _global_
+
+# specify here default configuration
+# order of defaults determines the order in which configs override each other
+defaults:
+  - _self_
+  - data:
+  - model:
+  - task:
+
+seed: 7
+resume_ckpt: null
+output_dir: ${hydra:runtime.output_dir}
+
+# checkpointing
+checkpointing_steps: 5000
+
+# logger configuration - supports swanlab, wandb, or none
+logger:
+  type: "swanlab"  # Options: "swanlab", "wandb", null
+  log_steps: 10
+  task: ${hydra:runtime.choices.task}
+  project: ${split:${logger.task},0}  # Will be auto-set from task name
+  experiment_name: ${split:${logger.task},-1}  # Will be auto-set from task name
+  
+  # Common fields (interpretation depends on type):
+  # - For swanlab: mode can be "cloud", "local", "disabled"
+  # - For wandb: mode can be "online", "offline", "disabled"
+  mode: "cloud"
+  
+  # - For swanlab: workspace is the SwanLab workspace name
+  # - For wandb: workspace is the WandB entity/team name (optional)
+  workspace: Galaxea-AI
+  
+  # Output directory for logs (only used for wandb, auto-set to ${output_dir}/wandb or ${output_dir}/swanlab)
+  dir: null
+
+# eval
+batch_size_val: 16
+eval_episodes_num: 1
+ckpt_path: null
+env: R1ProBlocksStackEasy
+target_controller_type: bimanual_relaxed_ik
+
+hydra:
+  verbose: false  # Show full traceback for instantiate errors
+  run:
+    dir: "${oc.env:GALAXEA_FM_OUTPUT_DIR}/${hydra:runtime.choices.task}/${now:%Y-%m-%d_%H-%M-%S}"
+  job_logging:
+    handlers:
+      file:
+        filename: ${hydra.runtime.output_dir}/train.log
+
+tags: null
+
+edp:
+  card: # if not given, the model will not be uploaed to EDP
+  training_time: ${now:%Y-%m-%d}_${now:%H-%M-%S}
+  git_branch: null
+  git_commit: null
+  root: null
+  repo_ids: null # TODO: collect mixture dataset_dirs
+  save_dir: ${output_dir}
+  tags: ${tags}
+  max_steps: ${model.max_steps}
+  batch_size: ${model.batch_size}

@@ -1,0 +1,64 @@
+# @package _global_
+
+defaults:
+  - override /data: libero/default
+  - override /model: fdp/unet_clip
+
+data:
+  dataset_dirs:
+    - /GalaxeaFulltime-001/dataset/libero_lerobot/libero_10_no_noops
+
+ckpt_path: xx.pth
+
+model:
+  batch_size: 45 # (4 gpus * 14 = 56)
+  max_epochs: null
+  max_steps: 100000
+  processor:
+    action_state_transforms: null
+    train_transforms:
+      image:
+        - _target_: torchvision.transforms.Resize
+          size: [224, 224]
+        - _target_: torchvision.transforms.ColorJitter
+          brightness: 0.3
+          contrast: 0.4
+          saturation: 0.5
+          hue: 0.3
+        - _target_: galaxea_fm.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Normalize
+          mean: [0.48145466, 0.4578275, 0.40821073]
+          std: [0.26862954, 0.26130258, 0.27577711]
+      wrist_image:
+        - _target_: torchvision.transforms.Resize
+          size: [224, 224]
+        - _target_: torchvision.transforms.ColorJitter
+          brightness: 0.3
+          contrast: 0.4
+          saturation: 0.5
+          hue: 0.3
+        - _target_: galaxea_fm.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Normalize
+          mean: [0.48145466, 0.4578275, 0.40821073]
+          std: [0.26862954, 0.26130258, 0.27577711]
+
+    val_transforms:
+      image:
+        - _target_: torchvision.transforms.Resize
+          size: [224, 224]
+        - _target_: galaxea_fm.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Normalize
+          mean: [0.48145466, 0.4578275, 0.40821073]
+          std: [0.26862954, 0.26130258, 0.27577711]
+      wrist_image:
+        - _target_: torchvision.transforms.Resize
+          size: [224, 224]
+        - _target_: galaxea_fm.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Normalize
+          mean: [0.48145466, 0.4578275, 0.40821073]
+          std: [0.26862954, 0.26130258, 0.27577711]
+
+libero:
+  task_suite_name: libero_10
+  num_trials_per_task: 50
+  num_steps_wait: 10

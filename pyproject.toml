@@ -3,16 +3,14 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "G0"
+name = "galaxea_fm"
 authors = [
-    {name = "Tianyuan Yuan", email="yuantianyuan01@gmail.com"},
-    {name = "Yicheng Liu", email="moooooore66@gmail.com"},
-    {name = "Chenhao Lu", email="luch21@mails.tsinghua.edu.cn"},
+    {name = "GalaxeaAI", email="wave.leaf27@gmail.com"},
 ]
-description = "Galaxea G0-VLA"
+description = "Galaxea Foundation Model"
 version = "0.0.1"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10.16,<3.11"
 keywords = ["vision-language-actions models", "multimodal pretraining", "robot learning"]
 license = {file = "LICENSE"}
 classifiers = [
@@ -31,47 +29,148 @@ classifiers = [
 ]
 
 dependencies = [
-    "einops",
-    "huggingface-hub==0.24.0",
-    "json-numpy==2.1.0",
-    "jsonlines==4.0.0",
+    # huggingface
+    "accelerate==1.8.1",
+    "datasets==3.6.0",
+    "diffusers==0.29.0",
+    "huggingface-hub==0.35.0",
+    "transformers==4.57.1",
+    "safetensors==0.6.1",
+    "peft==0.18.0",
+
+    # configuaration
+    "draccus==0.10.0",
+    "hydra-colorlog==1.2.0",
+    "hydra-core==1.3.2",
+    "hydra-optuna-sweeper==1.2.0",
+
+    # images & videos
+    "av==14.2.0",
+    "einops==0.8.0",
     "matplotlib==3.10.0",
-    "peft==0.11.1",
-    "protobuf==3.20.3",
-    "rich==13.7.1",
-    "sentencepiece==0.1.99",
+    "numpy==1.26.4",
+    "h5py==3.14.0",
+    "imageio==2.34.1",
+    "imageio-ffmpeg==0.6.0",
+    "opencv-python==4.10.0.84",
+    "pillow==10.2.0",
+    "plotly==6.2.0",
+    "pandas==2.2.3",
+    "scipy==1.15.3",
+    "sharedarray==3.2.4",
+    "zarr==2.18.3",
+
+    # torch
+    "ema-pytorch==0.7.7",
+    "deepspeed==0.15.4",
+    "nvidia-ml-py",
     "timm==0.9.10",
-    "tokenizers==0.21.0",
-    "transformers==4.47.1",
-    "wandb==0.19.6",
-    "tensorflow==2.15.0",
-    "tensorflow_datasets==4.9.3",
-    "tensorflow_graphics==2021.12.3",
-    "beartype",
-    "einx>=0.3.0",
-    "einops>=0.8.0",
-    "ema-pytorch>=0.7.3",
-    "jaxtyping",
-    "rotary-embedding-torch>=0.8.5",
-    "rospkg==1.6.0",
-    "scipy==1.13.1",
-    "torch==2.5.0",
-    'torchtyping>=0.1.5',
-    "tqdm==4.67.1",
-    "prettytable==3.14.0",
-    "omegaconf==2.3.0",
-    "diffusers==0.11.0",
+    "pytorch_kinematics_ms==0.7.3",
+    "torch==2.7.1",
+    "torchvision==0.22.1",
+    "torchaudio==2.7.1",
+    "torchmetrics==1.7.4",
+    "torch-geometric==2.5.3",
+    "torchcodec==0.4.0",
+    "vit-pytorch==1.9.1",
+
+    # GalaxeaManipSim
+    "coacd==1.0.5",
+    "gymnasium==0.29.1",
+    "mplib==0.2.1",
+    "open3d==0.18.0",
+    "seaborn==0.13.2",
+    "sapien==3.0.0b1",
+    "transforms3d==0.4.1",
+    "trimesh==4.7.3",
+    "tyro==0.9.28",
+
+    # lerobot
+    "deepdiff==8.5.0",
+    "jsonlines==4.0.0",
+    "numba==0.61.2",
+    "pymunk==6.11.1",
+    "pyserial==3.5",
+
+    # logging utils
+    "loguru==0.7.3",
+    "pyyaml==6.0.3",
+    "rootutils==1.0.7",
+    "rich==13.9.4",
+    "swanlab==0.6.9",
+    "termcolor==2.4.0",
+    "tqdm>=4.67.1",
+    "toml==0.10.2",
+    "wandb==0.23.1",
+
+    # utils
+    "gdown==5.2.0",
+    "yapf==0.40.2",
+    "addict==2.4.0",
+    "plyfile==1.0.3",
+
+    # edp
+    "tos",
+    "GitPython",
+    
+    # onnx
+    "onnx==1.18.0",
+    "polygraphy",
+    "onnxoptimizer",
+    "onnxruntime",
+    "onnx_graphsurgeon",
+
+    # libero
+    "easydict==1.9",
+    "robomimic==0.2.0",
+    "thop==0.1.1-2209072238",
+    "robosuite==1.4.0",
+    "bddl==1.0.1",
+    "future==0.18.2",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.4",
+    "ipython==8.31.0",
+    "ipdb==0.13.13",
+    "jupytext==1.16.6",
+    "nbformat==5.10.4",
+    "pre-commit==4.0.1",
+]
 
 [project.urls]
-homepage = "https://opengalaxea.github.io/G0/"
-repository = "https://github.com/OpenGalaxea/G0"
-documentation = "https://github.com/OpenGalaxea/G0"
+Homepage = "https://opengalaxea.github.io/G0/"
+Repository = "https://github.com/OpenGalaxea/G0"
+Documentation = "https://github.com/OpenGalaxea/G0"
+
 
 [tool.setuptools.packages.find]
-where = ["."]
+# Use the src/ layout so packages are discovered under src/
+where = ["src"]
 exclude = ["cache"]
 
+[tool.setuptools.package-dir]
+"" = "src"
+
 [tool.setuptools.package-data]
-"prismatic" = ["py.typed"]
+"galaxea_fm" = ["py.typed"]
+
+[tool.uv.workspace]
+members = [
+    "galaxea_fm",
+]
+
+[tool.uv.pip]
+index-url = "https://mirrors.aliyun.com/pypi/simple/"
+index-strategy = "unsafe-best-match"
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu128", marker = "sys_platform != 'darwin'"},
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://mirrors.aliyun.com/pytorch-wheels/cu128"
+format = "flat"
