@@ -184,9 +184,13 @@ If you use our dataset or models, please cite:
 
 ## License
 
-This repository contains materials released under different licenses depending on the release/tag:
-- **Legacy releases (Apache-2.0):** Versions released on August 11, 2025 are licensed under **Apache-2.0**.
-- **G0 Plus releases (Non-Commercial):** Versions released starting from January 4, 2026 are licensed under the **G0 Plus Community License Agreement (Non-Commercial + Limited Patent License)**. See [G0 Plus Community License Agreement](./LICENSE-G0-PLUS).
+This repository contains materials released under different licenses depending on the commit date:
+- **Apache-2.0 (Legacy)**: All content committed **before 2026-01-04** is licensed under the Apache License 2.0.
+- **G0 PLUS Community License Agreement (Current)**: All content **committed on or after 2026-01-04** is licensed under the **G0 PLUS Community License (Non-Commercial + Limited Patent License)**. See [G0 Plus Community License Agreement](./LICENSE-G0-PLUS).
+
+For avoidance of doubt, the licensing boundary is the first commit that introduced the G0 PLUS license switch:
+- Boundary commit (first under G0 PLUS license): `318207fe6d994d0ecaf8f7d7ebb9b96fec5ebf56`.
+
 
 ### What you can do under the G0 Plus Community License
 

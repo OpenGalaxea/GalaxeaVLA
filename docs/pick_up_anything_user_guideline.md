@@ -224,7 +224,6 @@ Reference Link:
   ├── g0plus_ros2/
       ├── data                            # Files to be linked to the docker container
       |   ├── G0Plus_PP_CKPT/             # G0Plus weights folder
-      |   |   ├── model_state_dict.pt     # G0Plus weights file
       |   |   ├── prefill.fp16.engine     # G0Plus prefill engine file
       |   |   └── decode.fp16.engine      # G0Plus decode engine file
       |   |   └── ...            
