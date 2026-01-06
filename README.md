@@ -90,8 +90,8 @@ uv pip install -e .
 uv pip install -e .[dev]
 ```
 Note that before you run the installation:
-1. recommend to [install uv](https://docs.astral.sh/uv/getting-started/installation/) without using a conda environment.
-2. recommend to add env variables at the beginning of your terminal, if you are in the country:
+1. Recommend to [install uv](https://docs.astral.sh/uv/getting-started/installation/) without using a conda environment.
+2. Recommend to add env variables at the beginning of your terminal, if you are in the country:
    ```bash
    export UV_DEFAULT_INDEX=https://mirrors.aliyun.com/pypi/simple/
    export UV_PYTHON_INSTALL_MIRROR=https://gh-proxy.com/https://github.com/astral-sh/python-build-standalone/releases/download
@@ -105,6 +105,15 @@ Note that before you run the installation:
 | G0_3B_base              | Fine-Tuning | Base G0-VLA Model for fine-tuning | https://huggingface.co/OpenGalaxea/G0-VLA/blob/main/G0_3B_base.pt |
 | G0Plus_3B_base              | Fine-Tuning | Base G0Plus-VLA Model for fine-tuning | https://huggingface.co/OpenGalaxea/G0-VLA/tree/main/G0Plus_3B_base |
 | G0Plus_3B_base-pick_and_place | Deployment | Pick-and-Place Demo in the Wild | https://huggingface.co/OpenGalaxea/G0-VLA/tree/main/G0Plus_PP_CKPT |
+
+
+### Inference on Real Robot
+
+To run inference on a real Galaxea R1Lite robot using our pre-trained G0Plus model:
+
+1. Make sure to finish the above installation steps first. 
+
+2. Then, follow steps and refer more details in our accompanying repo [EFMNode](https://github.com/OpenGalaxea/EFMNode).
 
 ### 🔥 Fine-Tuning Base Models on Galaxea R1Lite Robot
 

@@ -61,19 +61,21 @@ sudo apt install docker-ce
 
 - If you want to access Docker without sudo, simply enter the following commands, which mean adding the user to the new Docker group, restarting Docker, and switching the current session to the new group. 
 
-```bash
-sudo groupadd docker
+   ```bash
+   sudo groupadd docker
 
-sudo gpasswd -a ${USER} docker
+   sudo gpasswd -a ${USER} docker
 
-sudo service docker restart
+   sudo service docker restart
 
-newgrp - docker
-```
+   newgrp - docker
+   ```
 
 #### 1.7 Installation is now complete
 
 -  You can enter `sudo docker --version` or `sudo docker run hello-world` to test if the installation was successful! 
+
+---
 
 Reference Link: [How to Install and Use Docker on Ubuntu 20.04 System_Install Docker on Ubuntu 20.04 - CSDN Blog](https://blog.csdn.net/qq_38156743/article/details/130401015)
 
@@ -163,6 +165,8 @@ sudo nvidia-ctk runtime configure --runtime=docker
 sudo systemctl restart docker
 ```
 
+---
+
 Reference Link:
   - 3.1-3.2 refer to: [Installing the NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
   - 3.3-3.5 refer to: [Resolve the exception when Docker running containers use GPU resources: could not select device driver "" with capabilities: [[gpu]]_error respons](https://blog.csdn.net/qq_38628046/article/details/136312844)
@@ -245,6 +249,9 @@ Reference Link:
 
 (Host) Download the paligemma weights [paligemma-3b-pt-224 on Huggingface](https://huggingface.co/google/paligemma-3b-pt-224), and place it in the `data/google/` folder created in the previous step.
 
+#### 1.6 EHI APP Download & Installation
+
+(Android Device) Download and install our latest EHI APP from [here](https://huggingface.co/OpenGalaxea/G0-VLA/blob/main/GalaxeaEHI-251202-pick-up-anything.apk).
 
 ### 2. Startup Robot
 
@@ -284,3 +291,48 @@ cd ~/g0plus_ros2
     5. Enter the robot port number (PORT), default is "180" (only supports ports starting with `10.42.0.`).
 
     6. Enter the name of the Docker container to start, default is `g0plus_ros2_v1`. After this final step, the terminal will enter the tmux session inside the Docker container.
+
+### 4. Give Instructions via EHI APP
+
+1. (Android Device) Open the EHI APP installed in Step 1.6 of this section. Recommend to use a tablet for better experience.
+
+2. (Android Device) Make sure your Android device is connected to the same network as the Host computer:
+
+    <p align="center">
+    <img src="assets/pick_up_anything_demo/pp-app3.png" alt="pp-app3" width="700"/>
+    </p>
+
+3. (Android Device) Go to the "Pick Up Anything Demo" page as shown below:
+
+    <p align="center">
+    <img src="assets/pick_up_anything_demo/pp-app1.png" alt="pp-app1" width="700"/>
+    </p>
+
+    <p align="center">
+    <img src="assets/pick_up_anything_demo/pp-app2.png" alt="pp-app2" width="700"/>
+    </p>
+
+4. (Android Device) Enter your Host computer's WIFI IP address (e.g., `192.168.23.9`), then click orange button "Connect":
+
+    <p align="center">
+    <img src="assets/pick_up_anything_demo/pp-app4.png" alt="pp-app4" width="700"/>
+    </p>
+
+    <p align="center">
+    <img src="assets/pick_up_anything_demo/pp-app5.png" alt="pp-app5" width="700"/>
+    </p>
+
+
+5. (Android Device) Now, you can give instructions to the robot via voice or text input:
+
+    <p align="center">
+    <img src="assets/pick_up_anything_demo/pp-app6.png" alt="pp-app6" width="700"/>
+    </p>
+
+    <p align="center">
+    <img src="assets/pick_up_anything_demo/pp-app7.png" alt="pp-app7" width="700"/>
+    </p>
+
+## 😊 Enjoy it Now!
+
+Feel free to raise an issue if you have any questions.
