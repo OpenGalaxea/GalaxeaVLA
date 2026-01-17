@@ -211,3 +211,6 @@ If you redistribute any part of the G0 Plus materials, you must include:
 - a copy/link of G0 Plus Community License Agreement, and
 - the NOTICE file in this repository, and
 - prominent notices on modified files indicating changes.
+  ## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=OpenGalaxea/GalaxeaVLA&type=date&legend=top-left)](https://www.star-history.com/#OpenGalaxea/GalaxeaVLA&type=date&legend=top-left)
