@@ -289,7 +289,7 @@ LIBERO 安装说明、生成的路径配置、输出布局和单 suite 调试命
 
 为避免疑义，存在两个许可证边界，每个边界均由首次引入相应许可证切换的 commit 决定：
 - 边界 1（Apache-2.0 / G0 PLUS）：G0 PLUS 许可证下的第一个 commit（引入 G0 PLUS 许可证切换）：[38b31e4](https://github.com/OpenGalaxea/GalaxeaVLA/tree/38b31e4f732ef28719a5458a18e2836dd52f9d12)
-- 边界 2（G0 PLUS / G0.5）：G0.5 许可证下的第一个 commit（引入 G0.5 许可证切换）：[COMMIT_HASH_2]
+- 边界 2（G0 PLUS / G0.5）：G0.5 许可证下的第一个 commit（引入 G0.5 许可证切换）：[dc0a1ef](https://github.com/OpenGalaxea/GalaxeaVLA/tree/dc0a1ef4531256adea4ee9f3d7d2fa44613cb866)
 
 如果日期描述与 commit hash 存在任何不一致，以 commit hash 为准。
 

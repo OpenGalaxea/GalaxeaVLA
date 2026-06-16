@@ -286,7 +286,7 @@ This repository contains materials released under different licenses depending o
 - G0.5 Community License Agreement: All content committed on or after 2026-06-16 is licensed under the G0.5 Community License (Non-Commercial + Limited Patent License). See [G0.5 Community License Agreement](licenses/LICENSE-G0.5).
 For avoidance of doubt, there are two licensing boundaries, each determined by the first commit that introduces the corresponding license switch:
 - Boundary 1 (Apache-2.0 / G0 PLUS): First commit under the G0 PLUS license (introducing the G0 PLUS license switch): [38b31e4](https://github.com/OpenGalaxea/GalaxeaVLA/tree/38b31e4f732ef28719a5458a18e2836dd52f9d12)
-- Boundary 2 (G0 PLUS / G0.5): First commit under the G0.5 license (introducing the G0.5 license switch): [COMMIT_HASH_2]
+- Boundary 2 (G0 PLUS / G0.5): First commit under the G0.5 license (introducing the G0.5 license switch): [dc0a1ef](https://github.com/OpenGalaxea/GalaxeaVLA/tree/dc0a1ef4531256adea4ee9f3d7d2fa44613cb866)
 In the event of any inconsistency between the date descriptions and the commit hashes, the commit hashes shall prevail.
 
 ### What you can do under the G05 Community License
