@@ -1,0 +1,26 @@
+[project]
+name = "g05-r1lite-client"
+version = "0.1.0"
+description = "Pure ROS2 client: gather obs → WebSocket → execute actions"
+requires-python = ">=3.10"
+
+dependencies = [
+    "numpy",
+    "opencv-python",
+    "msgpack",
+    "websockets",
+    "typing-extensions",
+    "toml",
+    "loguru",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.uv]
+# Application project — no build, just manage dependencies
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

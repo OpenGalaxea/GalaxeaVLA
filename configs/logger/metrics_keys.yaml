@@ -1,0 +1,142 @@
+# ============================================================================
+# Metric key configuration: toggles and collection frequency for 73 observable metrics.
+# ============================================================================
+#
+# Each key corresponds to a WandB/TensorBoard metric:
+#   enabled: true/false   — whether to collect it
+#   min_interval: N       — minimum collection interval in steps; effective frequency = max(log_steps, min_interval)
+#
+# Reference from train.yaml with logger.metrics.keys: ${oc.load:logger/metrics_keys.yaml}
+# Override with Hydra, e.g. logger.metrics.keys.<key>.enabled=false
+#
+# ============================================================================
+
+# ---- Training Basics (previously unconditional outputs, now in the registry) ----
+loss_ema_ce:               {enabled: true, min_interval: 1}
+loss_ema_fm:               {enabled: true, min_interval: 1}
+grad_clip_fraction:        {enabled: true, min_interval: 1}
+
+# ---- Gradient Norms ----
+grad_norm_global:          {enabled: true, min_interval: 1}
+grad_clip_ratio:           {enabled: true, min_interval: 1}
+grad_frac_clipped_100:     {enabled: true, min_interval: 1}
+grad_norm_ve:              {enabled: true, min_interval: 1}
+grad_norm_proj:            {enabled: true, min_interval: 1}
+grad_norm_llm:             {enabled: true, min_interval: 1}
+grad_norm_ae:              {enabled: true, min_interval: 1}
+grad_norm_embed:           {enabled: true, min_interval: 1}
+grad_norm_llm_layers:      {enabled: true, min_interval: 50}
+grad_norm_ae_layers:       {enabled: true, min_interval: 50}
+
+# ---- Optimizer State ----
+optim_update_ratio_llm:    {enabled: true, min_interval: 100}
+optim_update_ratio_ae:     {enabled: true, min_interval: 100}
+optim_update_ratio_ve:     {enabled: true, min_interval: 100}
+optim_lr:                  {enabled: true, min_interval: 1}
+optim_v_mean_llm:          {enabled: true, min_interval: 200}
+optim_v_mean_ae:           {enabled: true, min_interval: 200}
+optim_snr_llm:             {enabled: true, min_interval: 200}
+optim_implicit_lr_drift:   {enabled: true, min_interval: 500}
+
+# ---- Weight Norms ----
+weight_norm_llm_global:       {enabled: true, min_interval: 200}
+weight_norm_ae_global:        {enabled: true, min_interval: 200}
+weight_norm_llm_attn_layers:  {enabled: true, min_interval: 500}
+weight_norm_llm_mlp_layers:   {enabled: true, min_interval: 500}
+weight_norm_ln_gamma:         {enabled: true, min_interval: 200}
+weight_norm_posemb:           {enabled: true, min_interval: 500}
+weight_norm_ve_global:        {enabled: true, min_interval: 500}
+
+# ---- Deep Model Activations (requires enable_hooks=true) ----
+act_residual_norm_layers:  {enabled: true, min_interval: 200}
+act_mlp_saturation_layers: {enabled: true, min_interval: 500}
+act_nan_count:             {enabled: true, min_interval: 1}
+act_inf_count:             {enabled: true, min_interval: 1}
+
+# ---- Attention Statistics (requires enable_hooks=true, high cost) ----
+attn_logit_mean_layers:    {enabled: true, min_interval: 200}
+attn_logit_max_layers:     {enabled: true, min_interval: 200}
+attn_entropy_mean_layers:  {enabled: true, min_interval: 200}
+attn_sink_score_layers:    {enabled: true, min_interval: 500}
+
+# ---- Spike Detection ----
+spike_z_score:             {enabled: true, min_interval: 1}
+spike_raw_loss_ratio:      {enabled: true, min_interval: 1}
+spike_batch_source:        {enabled: true, min_interval: 1}
+spike_repeat_ngram_score:  {enabled: true, min_interval: 100}
+spike_repeat_ngram_text:   {enabled: true, min_interval: 100}
+spike_repeat_ngram_action: {enabled: true, min_interval: 100}
+spike_adam_momentum_spike: {enabled: true, min_interval: 1}
+
+# ---- Per-Token-Type (text vs action) ----
+token_loss_text:           {enabled: true, min_interval: 1}
+token_loss_action:         {enabled: true, min_interval: 1}
+token_acc_text:            {enabled: true, min_interval: 1}
+token_acc_action:          {enabled: true, min_interval: 1}
+token_entropy_text:        {enabled: true, min_interval: 500}
+token_entropy_action:      {enabled: true, min_interval: 500}
+token_count_text:          {enabled: true, min_interval: 100}
+token_count_action:        {enabled: true, min_interval: 100}
+
+# ---- Cross-Modal Alignment ----
+modal_loss_ratio_action_lang:  {enabled: true, min_interval: 200}
+modal_proj_align_loss:         {enabled: true, min_interval: 1}
+modal_ve_feature_drift:        {enabled: true, min_interval: 1000}
+modal_action_token_entropy:    {enabled: true, min_interval: 500}
+modal_image_attn_sink_ratio:   {enabled: true, min_interval: 500}
+modal_ae_llm_feature_sim:      {enabled: true, min_interval: 1000}
+
+# ---- Data Pipeline ----
+data_tokens_consumed:      {enabled: true, min_interval: 1}
+data_loading_time:         {enabled: true, min_interval: 1}
+data_compute_time:         {enabled: true, min_interval: 1}
+data_loading_ratio:        {enabled: true, min_interval: 1}
+data_batch_count:          {enabled: true, min_interval: 1}
+data_padding_ratio:        {enabled: true, min_interval: 100}
+data_domain_weights:       {enabled: true, min_interval: 500}
+data_seq_len_mean:         {enabled: true, min_interval: 100}
+
+# ---- Weight Forensics Live (SVD + moments, vs pi05 reference) ----
+# Runs forensics every N steps on about 68 key projections (LLM writeback/readback,
+# lower VE layers, mm_proj, AE), compares them with the pi05 reference, and monitors
+# weight signatures of mode collapse:
+# stable_rank down + top1_energy up + kurtosis up = writeback-side collapse.
+# Each run takes about 3-5s on A100. Default interval is 500 steps, about 0.3-0.7%
+# of training time. The reference path comes from top-level logger.weight_forensics_ref_path.
+weight_fx_stable_rank:      {enabled: true, min_interval: 500}
+weight_fx_top1_energy:      {enabled: true, min_interval: 500}
+weight_fx_kurtosis:         {enabled: true, min_interval: 500}
+weight_fx_frobenius:        {enabled: true, min_interval: 500}
+weight_fx_vs_pi05:          {enabled: true, min_interval: 500}
+weight_fx_collapse_alert:   {enabled: true, min_interval: 500}
+
+# ---- Phase 3 Basics (previously had dedicated intervals, now in the registry) ----
+optim_second_moment:       {enabled: true, min_interval: 500}
+optim_effective_lr:        {enabled: true, min_interval: 500}
+model_update_ratio:        {enabled: true, min_interval: 500}
+logit_stats:               {enabled: true, min_interval: 100}
+
+# ---- Model Internals (previously hard-coded in GlobalMonitor) ----
+monitor_x_out_stats:       {enabled: true, min_interval: 100}
+monitor_softmax_maxlogits: {enabled: true, min_interval: 100}
+
+# ---- Research Metrics (new research metrics) ----
+optim_rms_diagnostic:      {enabled: true, min_interval: 100}
+action_per_dim_acc:        {enabled: true, min_interval: 100}
+act_dead_neuron_ratio:     {enabled: true, min_interval: 1000}
+act_kurtosis_layers:       {enabled: true, min_interval: 500}
+gradient_direction_cosine: {enabled: true, min_interval: 500}
+
+# ---- New Diagnostics ----
+grad_effective_utilization: {enabled: true, min_interval: 1}      # Gradient utilization (<1 when clipped)
+mem_gpu:                    {enabled: true, min_interval: 100}     # GPU memory allocated/peak
+token_codebook_usage:       {enabled: true, min_interval: 100}    # Codebook usage + action unique ratio
+token_action_calibration:   {enabled: true, min_interval: 100}    # Action token ECE (calibration error)
+attn_entropy_per_head:      {enabled: true, min_interval: 200}    # Per-head entropy min/std + collapsed count
+optim_gns:                  {enabled: true, min_interval: 100}    # Gradient Noise Scale (micro-batch loss variance approximation)
+
+# ---- SSM Param Health (A_log / dt_bias silent-death detection) ----
+ssm_dtype_check:            {enabled: true, min_interval: 100}    # 1.0=normal fp32, 0.0=cast to bf16 (silent death)
+ssm_grad_norm:              {enabled: true, min_interval: 1}      # A_log/dt_bias gradient norm; near-zero means no gradient flow
+ssm_optim_v_mean:           {enabled: true, min_interval: 100}    # Adam v_t mean; lower under bf16 precision truncation
+ssm_update_ratio:           {enabled: true, min_interval: 200}    # ‖ΔW‖/‖W‖; zero means SSM parameters are not updating

@@ -1,0 +1,28 @@
+# SO100 policy client configuration file.
+# Pass to so100_policy_client.py via --config client_config.yaml
+
+# ──────── proprio OOD guard ────────────────────────────────────────────────
+# Clamp or soft-remap the robot's current joint state (in model frame) before
+# sending it to the server, preventing out-of-distribution proprio inputs from
+# collapsing the model's action predictions.
+#
+# mode choices:
+#   "none"   — disabled, send raw joint state (default)
+#   "clip"   — hard-clamp each joint to [q01, q99] of the training distribution
+#   "zscore" — soft-remap: values > k*sigma from the mean are pulled back to k*sigma
+#
+# stats_path: path to dataset_stats.json produced during training.
+#   The file must contain  so100 → state → right_arm → global_q01/q99/mean/std.
+#   Leave as the default run/dataset_stats.json when using the packaged deploy.
+#
+proprio_guard:
+  mode: "none"          # "none" | "clip" | "zscore"
+  stats_path: "run/dataset_stats.json"
+  stats_embodiment: "so100"   # top-level key in dataset_stats.json
+  stats_state_key: "right_arm"
+
+  # clip mode: clamp to [q01, q99] from training stats (model frame degrees).
+  # No extra parameters needed — q01/q99 come directly from stats_path.
+
+  # zscore mode: pull joints that are > k*sigma from the training mean back to k*sigma.
+  zscore_k: 3.0         # cut-off in standard deviations (default: 3.0 = 99.7% coverage)

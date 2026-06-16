@@ -1,0 +1,124 @@
+_target_: g05.data.mixture_lerobot_dataset.MixtureLerobotDataset
+use_weight_normalization: true
+use_weight_for_sampling: false
+action_size: 32
+past_action_size: 0
+obs_size: 1
+val_set_proportion: 0.005
+is_training_set: true
+embodiment_datasets:
+  Bridge:
+    type: g05.data.base_lerobot_datasetV3.BaseLerobotDatasetV3
+    embodiment_type: Bridge
+    lerobot_ds_version: '3.0'
+    load_images: true
+    val_set_proportion: 0.05
+    shape_meta:
+      action:
+      - key: right_ee_pose
+        lerobot_key: observation.state
+        start_index: 0
+        raw_shape: 6
+        shape: 6
+        time_offset: 1
+      - key: right_gripper
+        lerobot_key: action
+        start_index: 6
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      state:
+      - key: right_ee_pose
+        lerobot_key: observation.state
+        start_index: 0
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: right_gripper
+        lerobot_key: observation.state
+        start_index: 7
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      images:
+      - key: image
+        camera_type: exterior
+        lerobot_key: observation.images.image_0
+        start_index: 0
+        raw_shape:
+        - 3
+        - 256
+        - 256
+        shape:
+        - 3
+        - 224
+        - 224
+        time_offset: 0
+    dataset_groups:
+    - weight: 1.0
+      dataset_dirs:
+      - data/bridge/bridge_orig_lerobot
+processors:
+  Bridge:
+    shape_meta:
+      action:
+      - key: right_ee_pose
+        lerobot_key: observation.state
+        start_index: 0
+        raw_shape: 6
+        shape: 6
+        time_offset: 1
+      - key: right_gripper
+        lerobot_key: action
+        start_index: 6
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      state:
+      - key: right_ee_pose
+        lerobot_key: observation.state
+        start_index: 0
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: right_gripper
+        lerobot_key: observation.state
+        start_index: 7
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      images:
+      - key: image
+        camera_type: exterior
+        lerobot_key: observation.images.image_0
+        start_index: 0
+        raw_shape:
+        - 3
+        - 256
+        - 256
+        shape:
+        - 3
+        - 224
+        - 224
+        time_offset: 0
+    action_state_transforms:
+    - _target_: g05.data_processor.transforms.relative_action.DeltaPoseTransform
+      keys:
+      - right_ee_pose
+    - _target_: g05.data_processor.transforms.misc.BinarizeTransform
+      keys:
+      - right_gripper
+      thresholds: 0.5
+      max: 1.0
+      min: 0.0
+    train_transforms:
+      image: ${oc.load:configs/data/_transforms.yaml,train_head}
+    val_transforms:
+      image: ${oc.load:configs/data/_transforms.yaml,val_exterior}
+    norm_default_mode: q01/q99
+    action_filter:
+      _target_: g05.data_processor.transforms.action_filter.DummyActionFilter
+    num_obs_steps: 1
+    use_stepwise_action_norm: false
+    drop_high_level_prob: 1.0
+    use_zh_instruction: false

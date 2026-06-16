@@ -3,11 +3,11 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "galaxea_fm"
+name = "g05"
 authors = [
-    {name = "GalaxeaAI", email="wave.leaf27@gmail.com"},
+    {name = "GalaxeaAI", email="yicheng.liu@galaxea.ai"},
 ]
-description = "Galaxea Foundation Model"
+description = "G0.5: Galaxea Foundation Model"
 version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.10.16,<3.11"
@@ -18,11 +18,9 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
+    "License :: Other/Proprietary License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -37,16 +35,11 @@ dependencies = [
     "transformers==4.57.1",
     "safetensors==0.6.1",
     "peft==0.18.0",
-
-    # model
-    "sentencepiece==0.2.1",
-
     # configuaration
     "draccus==0.10.0",
     "hydra-colorlog==1.2.0",
     "hydra-core==1.3.2",
     "hydra-optuna-sweeper==1.2.0",
-
     # images & videos
     "av==14.2.0",
     "einops==0.8.0",
@@ -62,7 +55,6 @@ dependencies = [
     "scipy==1.15.3",
     "sharedarray==3.2.4",
     "zarr==2.18.3",
-
     # torch
     "ema-pytorch==0.7.7",
     "deepspeed==0.15.4",
@@ -76,66 +68,72 @@ dependencies = [
     "torch-geometric==2.5.3",
     "torchcodec==0.4.0",
     "vit-pytorch==1.9.1",
-
     # GalaxeaManipSim
     "coacd==1.0.5",
     "gymnasium==0.29.1",
+    "gym==0.22.0",
     "mplib==0.2.1",
     "open3d==0.18.0",
     "seaborn==0.13.2",
-    "sapien==3.0.0b1",
+    "sapien==2.2.2",
     "transforms3d==0.4.1",
     "trimesh==4.7.3",
     "tyro==0.9.28",
-
     # lerobot
     "deepdiff==8.5.0",
     "jsonlines==4.0.0",
     "numba==0.61.2",
     "pymunk==6.11.1",
     "pyserial==3.5",
-
     # logging utils
     "loguru==0.7.3",
     "pyyaml==6.0.3",
     "rootutils==1.0.7",
     "rich==13.9.4",
-    "swanlab==0.7.6",
-    "swanlab[dashboard]==0.7.6",
-    "swanboard==0.1.9b1",
+    "swanlab==0.6.9",
     "termcolor==2.4.0",
     "tqdm>=4.67.1",
     "toml==0.10.2",
     "wandb==0.23.1",
-
+    "websockets==16.0",
     # utils
     "gdown==5.2.0",
     "yapf==0.40.2",
     "addict==2.4.0",
     "plyfile==1.0.3",
-
-    # edp
-    "tos",
-    "GitPython",
-    
-    # onnx
-    "onnx==1.18.0",
-    "polygraphy",
-    "onnxoptimizer",
-    "onnxruntime",
-    "onnx_graphsurgeon",
-
     # libero
     "easydict==1.9",
     "robomimic==0.2.0",
     "thop==0.1.1-2209072238",
     "robosuite==1.4.0",
+    "mujoco==3.3.2",
     "bddl==1.0.1",
     "future==0.18.2",
-    "gym==0.26.2",
-
-    # efmnode
-    "google-genai",
+    "decorator==5.2.1",
+    "nltk==3.9.2",
+    "sympy==1.14.0",
+    "timeout-decorator==0.5.0",
+    "requests==2.32.5",
+    "networkx==3.4.2",
+    "python-dotenv==1.2.1",
+    "scikit-learn==1.7.2",
+    "lxml==6.0.2",
+    "openai==2.15.0",
+    "regex==2025.11.3",
+    "antlr4-python3-runtime==4.9.3",
+    "jinja2==3.1.6",
+    "openpyxl>=3.1.5",
+    "packaging==25.0",
+    "pydantic==2.12.5",
+    "pydantic-core==2.41.5",
+    "validators==0.35.0",
+    "bitsandbytes>=0.49.1",
+    "vector-quantize-pytorch==1.27.6",
+    # Fused Linear Cross Entropy: avoids materializing [N, V] logits and saves about 15GB peak VRAM.
+    # Required by ar_helper.cal_ce_loss for large-vocabulary cases such as V=257k PaliGemma.
+    "liger-kernel>=0.5.0,<0.7",
+    "flash-linear-attention>=0.2.0",
+    "flash-attn-4>=4.0.0b15",
 ]
 
 [project.optional-dependencies]
@@ -149,9 +147,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://opengalaxea.github.io/G0/"
-Repository = "https://github.com/OpenGalaxea/G0"
-Documentation = "https://github.com/OpenGalaxea/G0"
+Homepage = "https://opengalaxea.github.io/G05/"
+Repository = "https://github.com/OpenGalaxea/GalaxeaVLA"
+Documentation = "https://github.com/OpenGalaxea/GalaxeaVLA/tree/main/docs"
 
 
 [tool.setuptools.packages.find]
@@ -163,15 +161,14 @@ exclude = ["cache"]
 "" = "src"
 
 [tool.setuptools.package-data]
-"galaxea_fm" = ["py.typed"]
+"g05" = ["py.typed"]
 
 [tool.uv.workspace]
 members = [
-    "galaxea_fm",
+    "g05",
 ]
 
 [tool.uv.pip]
-index-url = "https://mirrors.aliyun.com/pypi/simple/"
 index-strategy = "unsafe-best-match"
 
 [tool.uv.sources]
@@ -179,7 +176,33 @@ torch = [
   { index = "pytorch-cu128", marker = "sys_platform != 'darwin'"},
 ]
 
+# Override this index through UV_DEFAULT_INDEX when a mirror is required.
+[[tool.uv.index]]
+url = "https://pypi.org/simple"
+default = true
+
 [[tool.uv.index]]
 name = "pytorch-cu128"
-url = "https://mirrors.aliyun.com/pytorch-wheels/cu128"
-format = "flat"
+url = "https://download.pytorch.org/whl/cu128"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "gpu: requires CUDA GPU",
+    "pretrained: requires pretrained model weights",
+    "real_data: requires real dataset files",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.basedpyright]
+typeCheckingMode = "off"
+# reportMissingImports = "none"
+# reportMissingTypeStubs = "none"
+reportUnusedImport = "none"
+reportUnusedClass = "none"
+reportUnusedFunction = "none"
+reportUnusedVariable = "none"
+reportDuplicateImport = "none"

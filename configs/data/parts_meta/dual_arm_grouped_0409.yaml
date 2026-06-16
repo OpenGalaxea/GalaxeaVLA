@@ -1,0 +1,35 @@
+# Grouped dual-arm parts_meta for GroupedPaddingMerger (two-level merge_spec).
+# 6 keys: left/right arm, ee_pose, gripper.
+#
+# merge_spec format: {replacement_name: [raw_key, ...]} — list of mutually exclusive keys, order = priority
+# Each replacement_name selects the first non-virtual alternative; dim = max(alternative_dims).
+#
+# 4 groups in flat tensor order:
+#   left_control(9) | left_gripper(1) | right_control(9) | right_gripper(1) = 20D
+#
+# left_control: left_arm(8) OR left_ee_pose(9) → max=9; first non-virtual wins.
+# left_gripper: single key, 1D.
+#
+# Tokenizer parts_meta must match this layout:
+#   parts_meta: {left_control: 9, left_gripper: 1, right_control: 9, right_gripper: 1}
+#
+# Usage (action_state_merger in task config):
+#   _target_: g05.data_processor.transforms.action_state_merger.GroupedPaddingMerger
+#   max_action_shape_meta: ${oc.load:configs/data/parts_meta/dual_arm_grouped_0409.yaml,parts_meta}
+#   max_state_shape_meta:  ${oc.load:configs/data/parts_meta/dual_arm_grouped_0409.yaml,parts_meta}
+#   merge_spec:            ${oc.load:configs/data/parts_meta/dual_arm_grouped_0409.yaml,merge_spec}
+#   merge: true
+
+parts_meta:
+  left_arm: 8
+  right_arm: 8
+  left_gripper: 1
+  right_gripper: 1
+  left_ee_pose: 9
+  right_ee_pose: 9
+
+merge_spec:
+  left_control: [left_arm, left_ee_pose]
+  left_gripper: [left_gripper]
+  right_control: [right_arm, right_ee_pose]
+  right_gripper: [right_gripper]

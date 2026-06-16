@@ -1,0 +1,75 @@
+# Single ActionCodec tokenizer config for G0.5 post-training.
+_target_: g05.tokenizer.interface.vq_base.VQActionTokenizer
+vq_config:
+  vqvae_type: g05.tokenizer.models.actioncodec2_v2.wrapper.ActionCodecV2Wrapper
+  block_wise_autoregressive: true
+  use_extra_tokens: true
+  block_size: 4
+  parts_meta:
+    left_control: 9
+    left_gripper: 1
+    right_control: 9
+    right_gripper: 1
+  rule_based_key_patterns:
+  - gripper
+  rule_based_min_block_len: 1
+  rule_based_binarize_threshold: 0.0
+  ckpt_dir: checkpoints/action_tokenizer.pt
+  model_arch:
+    max_component_dim: 9
+    horizon: 32
+    horizon_patch_size: 8
+    conv_in_action_kernel: 2
+    encoder_channels: 256
+    latent_dim: 128
+    c_mults:
+    - 1
+    - 2
+    - 2
+    strides:
+    - - 1
+      - 1
+    - - 2
+      - 1
+    - - 2
+      - 1
+    transformer_depths:
+    - 2
+    - 2
+    - 2
+    num_heads: 8
+    dim_heads: 64
+    ffn_mult: 4.0
+    use_layer_scale: true
+    layer_scale_init: 0.01
+    use_qk_norm: true
+    rope_base: 10000
+    use_block_dct: true
+    block_dct_block_size: 8
+    n_codebooks: 4
+    codebook_size: 4096
+    codebook_dim: 8
+    quantizer_dropout: 0.5
+    ema_decay: 0.95
+    threshold_ema_dead: 2
+    use_rotation_trick: false
+    commitment_loss_weight: 0.25
+    reconstruction_loss_weight: 1.0
+    consistency_loss_weight: 0.0
+    consistency_delta_max_begin: 1
+    consistency_delta_max_end: 3
+    consistency_eps_begin: 0.02
+    consistency_eps_end: 0.1
+    consistency_layer_weights_begin:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    consistency_layer_weights_end:
+    - 1.0
+    - 0.7
+    - 0.3
+    - 0.1
+    consistency_schedule_begin_fraction: 0.2
+    consistency_schedule_end_fraction: 0.8
+  action_template: '{action}'

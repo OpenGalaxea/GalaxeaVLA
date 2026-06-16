@@ -1,0 +1,223 @@
+_target_: g05.data.mixture_lerobot_dataset.MixtureLerobotDataset
+use_weight_normalization: true
+use_weight_for_sampling: false
+action_size: 32
+past_action_size: 0
+obs_size: 1
+val_set_proportion: 0.01
+is_training_set: true
+embodiment_datasets:
+  robotwin:
+    type: g05.data.base_lerobot_datasetV3.BaseLerobotDatasetV3
+    embodiment_type: robotwin
+    lerobot_ds_version: '3.0'
+    shape_meta:
+      action:
+      - key: left_arm
+        lerobot_key: action
+        start_index: 0
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: left_gripper
+        lerobot_key: action
+        start_index: 6
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      - key: right_arm
+        lerobot_key: action
+        start_index: 7
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: right_gripper
+        lerobot_key: action
+        start_index: 13
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      state:
+      - key: left_arm
+        lerobot_key: observation.state
+        start_index: 0
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: left_gripper
+        lerobot_key: observation.state
+        start_index: 6
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      - key: right_arm
+        lerobot_key: observation.state
+        start_index: 7
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: right_gripper
+        lerobot_key: observation.state
+        start_index: 13
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      images:
+      - key: cam_high
+        camera_type: exterior
+        lerobot_key: observation.images.cam_high
+        start_index: 0
+        raw_shape:
+        - 3
+        - 480
+        - 640
+        shape:
+        - 3
+        - 256
+        - 256
+        time_offset: 0
+      - key: cam_left_wrist
+        camera_type: wrist_left
+        lerobot_key: observation.images.cam_left_wrist
+        start_index: 0
+        raw_shape:
+        - 3
+        - 480
+        - 640
+        shape:
+        - 3
+        - 256
+        - 256
+        time_offset: 0
+      - key: cam_right_wrist
+        camera_type: wrist_right
+        lerobot_key: observation.images.cam_right_wrist
+        start_index: 0
+        raw_shape:
+        - 3
+        - 480
+        - 640
+        shape:
+        - 3
+        - 256
+        - 256
+        time_offset: 0
+    dataset_groups:
+    - weight: 1.0
+      dataset_dirs:
+      - data/robotwin/lerobot_v30
+processors:
+  robotwin:
+    shape_meta:
+      action:
+      - key: left_arm
+        lerobot_key: action
+        start_index: 0
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: left_gripper
+        lerobot_key: action
+        start_index: 6
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      - key: right_arm
+        lerobot_key: action
+        start_index: 7
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: right_gripper
+        lerobot_key: action
+        start_index: 13
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      state:
+      - key: left_arm
+        lerobot_key: observation.state
+        start_index: 0
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: left_gripper
+        lerobot_key: observation.state
+        start_index: 6
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      - key: right_arm
+        lerobot_key: observation.state
+        start_index: 7
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: right_gripper
+        lerobot_key: observation.state
+        start_index: 13
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      images:
+      - key: cam_high
+        camera_type: exterior
+        lerobot_key: observation.images.cam_high
+        start_index: 0
+        raw_shape:
+        - 3
+        - 480
+        - 640
+        shape:
+        - 3
+        - 256
+        - 256
+        time_offset: 0
+      - key: cam_left_wrist
+        camera_type: wrist_left
+        lerobot_key: observation.images.cam_left_wrist
+        start_index: 0
+        raw_shape:
+        - 3
+        - 480
+        - 640
+        shape:
+        - 3
+        - 256
+        - 256
+        time_offset: 0
+      - key: cam_right_wrist
+        camera_type: wrist_right
+        lerobot_key: observation.images.cam_right_wrist
+        start_index: 0
+        raw_shape:
+        - 3
+        - 480
+        - 640
+        shape:
+        - 3
+        - 256
+        - 256
+        time_offset: 0
+    action_state_transforms: null
+    train_transforms:
+      cam_high: ${oc.load:configs/data/_transforms.yaml,train_head}
+      cam_left_wrist: ${oc.load:configs/data/_transforms.yaml,train_head}
+      cam_right_wrist: ${oc.load:configs/data/_transforms.yaml,train_head}
+    val_transforms:
+      cam_high: ${oc.load:configs/data/_transforms.yaml,val_exterior}
+      cam_left_wrist: ${oc.load:configs/data/_transforms.yaml,val_exterior}
+      cam_right_wrist: ${oc.load:configs/data/_transforms.yaml,val_exterior}
+    norm_default_mode: z-score
+    norm_exception_mode: null
+    action_filter:
+      _target_: g05.data_processor.transforms.action_filter.DummyActionFilter
+    action_state_merger:
+      _target_: g05.data_processor.transforms.action_state_merger.PaddingActionMerger
+      merge: true
+      max_action_shape_meta: 14
+      max_state_shape_meta: 14
+    num_obs_steps: 1
+    use_stepwise_action_norm: false
+    drop_high_level_prob: 1.0
+    use_zh_instruction: false

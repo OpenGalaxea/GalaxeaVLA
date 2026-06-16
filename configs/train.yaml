@@ -6,34 +6,39 @@ defaults:
   - _self_
   - data:
   - model:
+  - tokenizer: null
   - task:
 
 seed: 7
+
+use_fused_optimizer: False # fused=True for AdamW: single fused CUDA kernel for optimizer step
 resume_ckpt: null
+exp_name: "${oc.env:EXP_NAME, ${now:%Y-%m-%d_%H-%M-%S}}"
 output_dir: ${hydra:runtime.output_dir}
-dataset_stats_cache_dir: ${oc.env:GALAXEA_FM_DATASET_STATS_CACHE_DIR}
-load_legacy_checkpoint: false  # true: single .pt file, false: directory format
 
 # checkpointing
-checkpointing_steps: 20000
+checkpointing_steps: 2000
+
+# eval
+eval_steps: 100
 
 # logger configuration - supports swanlab, wandb, or none
 logger:
-  type: "swanlab"  # Options: "swanlab", "wandb", null
+  type: "wandb" # Options: "swanlab", "wandb", null
   log_steps: 10
   task: ${hydra:runtime.choices.task}
-  project: ${split:${logger.task},0}  # Will be auto-set from task name
-  experiment_name: ${split:${logger.task},-1}  # Will be auto-set from task name
-  
+  project: "${oc.env:WANDB_PROJECT,g05}" # Will be auto-set from task name
+  experiment_name: ${split:${logger.task},-1}_${exp_name} # Will be auto-set from task name
+
   # Common fields (interpretation depends on type):
   # - For swanlab: mode can be "cloud", "local", "disabled"
   # - For wandb: mode can be "online", "offline", "disabled"
-  mode: "cloud"
-  
+  mode: "online"
+
   # - For swanlab: workspace is the SwanLab workspace name
   # - For wandb: workspace is the WandB entity/team name (optional)
-  workspace: Galaxea-AI
-  
+  workspace: "${oc.env:WANDB_ENTITY,Galaxea-AI}"
+
   # Output directory for logs (only used for wandb, auto-set to ${output_dir}/wandb or ${output_dir}/swanlab)
   dir: null
 
@@ -45,9 +50,10 @@ env: R1ProBlocksStackEasy
 target_controller_type: bimanual_relaxed_ik
 
 hydra:
-  verbose: false  # Show full traceback for instantiate errors
+  verbose: false # Show full traceback for instantiate errors
   run:
-    dir: "${oc.env:GALAXEA_FM_OUTPUT_DIR}/${hydra:runtime.choices.task}/${now:%Y-%m-%d_%H-%M-%S}"
+    # Use exp_name when provided; otherwise use a timestamp.
+    dir: "${oc.env:G05_OUTPUT_DIR}/${hydra:runtime.choices.task}/${exp_name}"
   job_logging:
     handlers:
       file:
@@ -55,17 +61,7 @@ hydra:
 
 tags: null
 
-
-
-libero_eval:
-  task_suite_names: 
-   - libero_10
-   - libero_spatial
-   - libero_object
-   - libero_goal
-  num_steps_wait: 10
-  replan_steps: 5
-  num_trials: 50
-  output_dir: ${output_dir}
-  run_id_note: null
-  env_num: 50
+# Tokenizer bridge: task configs override root `tokenizer:` key;
+# model code accesses via `cfg.model.tokenizer`.
+model:
+  tokenizer: ${tokenizer}

@@ -1,0 +1,88 @@
+# @package _global_
+defaults:
+- override /model: g05
+- override /tokenizer: actioncodec
+- override /data: r1lite
+- _self_
+shard_datasets_by_node: false
+use_fsdp: false
+fsdp_sharding_strategy: hybrid
+fsdp_mixed_precision: false
+fsdp_prefetch: true
+fsdp_reshard_after_forward: true
+vlm:
+  cotrain: false
+  batch_size: ${model.batch_size}
+  num_workers: 4
+  vlm_batch_ratio: 0.2
+  loss_weight: 1.0
+datastatics_path: null
+deploy_checkpoint:
+  enabled: true
+tokenizer:
+  vq_config:
+    block_wise_autoregressive: false
+    block_size: 8
+    num_residuals: 2
+    rule_based_key_patterns:
+    - gripper
+    rule_based_binarize_threshold: 0.0
+    use_group_markers: true
+    group_order_shuffle: false
+    dropout_noop_parts: true
+    absent_key_fill_value: -100.0
+    parts_meta:
+      left_control: 9
+      left_gripper: 1
+      right_control: 9
+      right_gripper: 1
+      lower_body: 7
+    model_arch:
+      codebook_size: 4096
+model:
+  use_8bit_optimizer: false
+  learning_rate: 4.0e-05
+  batch_size: 8
+  num_workers: 16
+  prefetch_factor: 4
+  max_epochs: 10
+  warmup_ratio: null
+  warmup_steps: 200
+  lr_scheduler_type: cosine
+  lr_min_ratio: 0.0
+  constant_end_ratio: 0.08
+  weight_decay: 0.03
+  processor:
+    vlm_input_action_norm_default_mode: null
+    vlm_input_action_norm_exception_mode: null
+    tokenizer_params:
+      local_files_only: true
+    camera_size_config:
+      exterior:
+      - 256
+      - 256
+      wrist_left:
+      - 256
+      - 256
+      wrist_right:
+      - 256
+      - 256
+    action_filter:
+      _target_: g05.data_processor.transforms.action_filter.DummyActionFilter
+    action_state_merger:
+      _target_: g05.data_processor.transforms.action_state_merger.GroupedPaddingMerger
+      max_action_shape_meta: ${oc.load:configs/data/parts_meta/r1lite.yaml,parts_meta}
+      max_state_shape_meta: ${oc.load:configs/data/parts_meta/r1lite.yaml,parts_meta}
+      merge_spec: ${oc.load:configs/data/parts_meta/r1lite.yaml,merge_spec}
+      merge: true
+  model_arch:
+    vision_lr_multiplier: 0.1
+    action_dim: 27
+    proprio_dim: 27
+    fm:
+      num_flow_samples: 4
+    ar:
+      block_wise_autoregressive: false
+    predict_cot: false
+    input_preprocessor:
+      pred_eov: false

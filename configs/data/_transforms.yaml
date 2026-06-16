@@ -1,0 +1,146 @@
+# =============================================================================
+# Self-contained transform pipeline definitions.
+# Safe for oc.load; contains no cross-file interpolation.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Training transforms for the head camera.
+# -----------------------------------------------------------------------------
+train_head:
+  # - _target_: torchvision.transforms.Resize
+  #   size: [224, 224]
+  - _target_: g05.data_processor.transforms.image.ToTensor
+  - _target_: torchvision.transforms.Normalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+
+  
+# -----------------------------------------------------------------------------
+# Training transforms for the head camera with RGB channel correction.
+# -----------------------------------------------------------------------------
+train_head_flip:
+  # - _target_: torchvision.transforms.Resize
+  #   size: [224, 224]
+  - _target_: g05.data_processor.transforms.image.ToTensor
+  - _target_: g05.data_processor.transforms.image.FlipChannels
+  - _target_: torchvision.transforms.Normalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+
+
+# -----------------------------------------------------------------------------
+# Training transforms for wrist cameras, with random drop.
+# -----------------------------------------------------------------------------
+train_wrist:
+  # - _target_: torchvision.transforms.Resize
+  #   size: [224, 224]
+  - _target_: g05.data_processor.transforms.image.ToTensor
+  - _target_: torchvision.transforms.Normalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+
+# -----------------------------------------------------------------------------
+# Training transforms for wrist cameras with RGB channel correction and random drop.
+# -----------------------------------------------------------------------------
+train_wrist_flip:
+  # - _target_: torchvision.transforms.Resize
+  #   size: [224, 224]
+  - _target_: g05.data_processor.transforms.image.ToTensor
+  - _target_: g05.data_processor.transforms.image.FlipChannels
+  - _target_: torchvision.transforms.Normalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+
+# -----------------------------------------------------------------------------
+# Training transforms for exterior cameras, without random drop.
+# -----------------------------------------------------------------------------
+train_exterior:
+  # - _target_: torchvision.transforms.Resize
+  #   size: [224, 224]
+  - _target_: g05.data_processor.transforms.image.ToTensor
+  - _target_: torchvision.transforms.ColorJitter
+    _convert_: all
+    brightness: 0.2
+    contrast: [0.8, 1.2]
+    saturation: [0.8, 1.2]
+    hue: 0.05
+  - _target_: torchvision.transforms.Normalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+
+# -----------------------------------------------------------------------------
+# Validation transforms, without data augmentation.
+# -----------------------------------------------------------------------------
+dummy:
+  - _target_: g05.data_processor.transforms.image.DummyImageTransform
+
+val:
+  # - _target_: torchvision.transforms.Resize
+  #   size: [224, 224]
+  - _target_: g05.data_processor.transforms.image.ToTensor
+  - _target_: torchvision.transforms.Normalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+
+# Validation transforms with RGB channel correction, without data augmentation.
+val_flip:
+  # - _target_: torchvision.transforms.Resize
+  #   size: [224, 224]
+  - _target_: g05.data_processor.transforms.image.ToTensor
+  - _target_: g05.data_processor.transforms.image.FlipChannels
+  - _target_: torchvision.transforms.Normalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+
+# Aliases for per-camera val transforms (all identical, no augmentation)
+val_wrist:
+  # - _target_: torchvision.transforms.Resize
+  #   size: [224, 224]
+  - _target_: g05.data_processor.transforms.image.ToTensor
+  - _target_: torchvision.transforms.Normalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+
+val_wrist_flip:
+  # - _target_: torchvision.transforms.Resize
+  #   size: [224, 224]
+  - _target_: g05.data_processor.transforms.image.ToTensor
+  - _target_: g05.data_processor.transforms.image.FlipChannels
+  - _target_: torchvision.transforms.Normalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+
+val_exterior:
+  # - _target_: torchvision.transforms.Resize
+  #   size: [224, 224]
+  - _target_: g05.data_processor.transforms.image.ToTensor
+  - _target_: torchvision.transforms.Normalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+
+# -----------------------------------------------------------------------------
+# Training transforms for Bridge cameras: random scale crop + color jitter.
+# -----------------------------------------------------------------------------
+train_bridge:
+  - _target_: g05.data_processor.transforms.image.ToTensor
+  - _target_: g05.data_processor.transforms.image.RandomScaleCrop
+    scale: 0.95
+  - _target_: torchvision.transforms.ColorJitter
+    brightness: 0.2
+    contrast: 0.2
+    saturation: 0.2
+    hue: 0.05
+  - _target_: torchvision.transforms.Normalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+
+# -----------------------------------------------------------------------------
+# Validation transforms for Bridge cameras: center scale crop, no data augmentation.
+# -----------------------------------------------------------------------------
+val_bridge:
+  - _target_: g05.data_processor.transforms.image.ToTensor
+  - _target_: g05.data_processor.transforms.image.CenterScaleCrop
+    scale: 0.95
+  - _target_: torchvision.transforms.Normalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]

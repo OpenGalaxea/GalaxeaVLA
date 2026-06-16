@@ -1,0 +1,20 @@
+[robot]
+hardware = "R1_LITE"
+embodiment_type = "galaxea_r1lite"
+
+[basic]
+use_ehi = false
+control_frequency = 15.0
+step_mode = "sync" # Optional["sync", "async"]
+action_steps = 16
+
+[websocket]
+host = "127.0.0.1"
+port = 8082
+
+[instruction]
+use_vlm = false
+bbox_as_instruction = false
+image_condition_lang_prefix = false
+pp_lower_half = false
+image_as_condition = false

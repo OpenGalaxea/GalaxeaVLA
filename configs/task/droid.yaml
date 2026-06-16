@@ -1,0 +1,43 @@
+# @package _global_
+defaults:
+- override /model: g05
+- override /tokenizer: actioncodec
+- override /data: droid
+- _self_
+datastatics_path: data/stats/droid_stats.json
+exp_name: g05_droid
+model:
+  max_epochs: 1
+  num_workers: 8
+  learning_rate: 0.0001
+  warmup_ratio: null
+  warmup_steps: 250
+  constant_end_ratio: 0.95
+  lr_min_ratio: 0.9
+  weight_decay: 1.0e-10
+  betas:
+  - 0.9
+  - 0.95
+  batch_size: 16
+  processor:
+    num_output_cameras: 3
+    norm_default_mode: q01/q99
+    norm_exception_mode:
+      action:
+        left_gripper: q01/q99
+        right_gripper: q01/q99
+      state:
+        left_gripper: q01/q99
+        right_gripper: q01/q99
+    vlm_input_action_norm_default_mode: null
+    vlm_input_action_norm_exception_mode: null
+    tokenizer_params:
+      local_files_only: true
+  model_arch:
+    vision_lr_multiplier: 1.0
+    action_dim: 20
+    proprio_dim: 20
+    max_chunk_token_length: 1200
+    checkpoint_vlm: true
+    checkpoint_action_expert: true
+eval_steps: 500

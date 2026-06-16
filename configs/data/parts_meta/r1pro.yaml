@@ -1,0 +1,19 @@
+# R1 Pro GBench grouped layout.
+# Grouped output layout:
+#   left_control(9) | left_gripper(1) | right_control(9) | right_gripper(1) | lower_body(7)
+parts_meta:
+  left_arm: 7
+  right_arm: 7
+  left_gripper: 1
+  right_gripper: 1
+  left_ee_pose: 9
+  right_ee_pose: 9
+  lower_body: 7
+  torso: 4
+
+merge_spec:
+  left_control: [left_arm, left_ee_pose]
+  left_gripper: [left_gripper]
+  right_control: [right_arm, right_ee_pose]
+  right_gripper: [right_gripper]
+  lower_body: [lower_body, torso]

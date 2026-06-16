@@ -1,0 +1,283 @@
+# Final G0.5 Qwen3.5-2B VLA model config.
+pretrained_ckpt: checkpoints/g05-base/checkpoints/model_state_dict.pt
+use_pretrained_norm_stats: false
+model_weights_to_bf16: false
+enable_bf16_training: true
+use_torch_compile: false
+find_unused_parameters: false
+batch_size: 16
+num_workers: 8
+pin_memory: true
+persistent_workers: true
+max_epochs: 2
+max_steps: null
+grad_accumulation_steps: 1
+use_8bit_optimizer: false
+learning_rate: 8.0e-05
+weight_decay: 0.01
+betas:
+- 0.9
+- 0.95
+lr_scheduler_type: warmup_constant_cosine
+lr_min_ratio: 0.1
+warmup_steps: 500
+max_grad_norm: 1.0
+use_ema: false
+ema:
+  update_after_step: 0
+  power: 0.67
+use_sync_bn: false
+collate_fn: identity
+model_arch:
+  _target_: g05.models.g05.g05_policy_qwen35.G05PolicyQwen35
+  pretrained_model_path: null
+  hf_processor_path: checkpoints/qwen3_5_2b_base_processor
+  hf_processor_class: g05.models.g05.qwen35.processing.Qwen35ProcessorWrapper
+  base_vocab_size: 248044
+  padded_vocab_size: 248320
+  add_loc_tokens: false
+  image_token_index: 248056
+  pad_token_id: 0
+  vocab_size: 248320
+  eos_token_id: 248044
+  action_dim: 20
+  proprio_dim: 20
+  proprio_encoder: mlp
+  horizon_steps: ${data.action_size}
+  cond_steps: ${obs_image_steps:${data.obs_size}}
+  num_obs_steps: ${model.model_arch.cond_steps}
+  attn_implementation: eager
+  position_ids_type: pi0fast
+  action_position_offset: null
+  checkpoint_vision: true
+  checkpoint_vlm: false
+  checkpoint_action_expert: false
+  vlm:
+    name: g05.models.g05.qwen35.mixture_qwen35.MixtureQwen35
+    hidden_size: 2048
+    intermediate_size: 6144
+    num_hidden_layers: 24
+    num_attention_heads: 8
+    num_key_value_heads: 2
+    head_dim: 256
+    rms_norm_eps: 1.0e-06
+    max_position_embeddings: 262144
+    attention_bias: false
+    input_type: embedding
+    vocab_size: ${model.model_arch.vocab_size}
+    pad_token_id: ${model.model_arch.pad_token_id}
+    output_type: lm_head
+    adaptive_mode: null
+    time_hidden_size: 0
+    use_final_norm: true
+    hidden_act: silu
+    rope_parameters:
+      rope_theta: 10000000.0
+      rope_type: default
+      mrope_section:
+      - 11
+      - 11
+      - 10
+      mrope_interleaved: true
+      partial_rotary_factor: 0.25
+    linear_attn_backend: fla
+    linear_conv_kernel_dim: 4
+    linear_key_head_dim: 128
+    linear_value_head_dim: 128
+    linear_num_key_heads: 16
+    linear_num_value_heads: 16
+    layer_types:
+    - linear_attention
+    - linear_attention
+    - linear_attention
+    - full_attention
+    - linear_attention
+    - linear_attention
+    - linear_attention
+    - full_attention
+    - linear_attention
+    - linear_attention
+    - linear_attention
+    - full_attention
+    - linear_attention
+    - linear_attention
+    - linear_attention
+    - full_attention
+    - linear_attention
+    - linear_attention
+    - linear_attention
+    - full_attention
+    - linear_attention
+    - linear_attention
+    - linear_attention
+    - full_attention
+  action_expert:
+    name: g05.models.g05.qwen35.mixture_qwen35.MixtureQwen35
+    hidden_size: 1024
+    intermediate_size: 4096
+    num_hidden_layers: 24
+    num_attention_heads: 8
+    num_key_value_heads: 2
+    head_dim: 256
+    rms_norm_eps: 1.0e-06
+    max_position_embeddings: 262144
+    attention_bias: false
+    adaptive_mode: adaLN
+    time_hidden_size: 1024
+    input_type: linear
+    input_dim: ${model.model_arch.action_dim}
+    output_type: linear
+    output_dim: ${model.model_arch.action_dim}
+    use_final_norm: true
+    hidden_act: silu
+    rope_parameters:
+      rope_theta: 10000000.0
+      rope_type: default
+      mrope_section:
+      - 11
+      - 11
+      - 10
+      mrope_interleaved: true
+      partial_rotary_factor: 0.25
+    linear_attn_backend: fla
+    linear_conv_kernel_dim: 4
+    linear_key_head_dim: 128
+    linear_value_head_dim: 128
+    linear_num_key_heads: 16
+    linear_num_value_heads: 16
+    layer_types:
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+    - full_attention
+  fm:
+    time_convention: pi_convention
+    flow_sampling: beta
+    flow_sig_min: 0.001
+    num_inference_steps: 10
+    num_flow_samples: 1
+    fm_weight: 1.0
+    joint_training: false
+    padding_action_weight: 0.0
+    zero_pad_action_target: false
+    final_action_clip_value: null
+    action_causal: false
+    horizon_steps: ${model.model_arch.horizon_steps}
+    action_dim: ${model.model_arch.action_dim}
+  ar:
+    ce_weight: 1.0
+    vocab_size: ${model.model_arch.vocab_size}
+    text_token_end: 248044
+    loc_token_end: 248077
+    use_fused_ce: true
+    ce_z_loss_scale: 0.0
+    block_wise_autoregressive: true
+    bos_blk_id: null
+    eos_blk_id: null
+    block_size: null
+    do_sample: false
+    max_new_tokens: 300
+    temperature: 0.7
+    top_k: 128
+    top_p: 0.95
+    repetition_penalty: 1.2
+    no_repeat_ngram_size: 3
+  vision:
+    name: g05.models.g05.qwen35.vision.Qwen3_5VisionModel
+    depth: 24
+    hidden_size: 1024
+    num_heads: 16
+    patch_size: 16
+    temporal_patch_size: 2
+    spatial_merge_size: 2
+    in_channels: 3
+    intermediate_size: 4096
+    out_hidden_size: 2048
+    num_position_embeddings: 2304
+    hidden_act: gelu_pytorch_tanh
+    num_image_tokens: null
+    num_channels: 3
+    temporal_freq: 0
+    spacetime_mode: factorized
+    token_drop_layer: null
+    temporal_pe_pretrain_frames: null
+    use_temporal_conv3d: false
+    batch_all_cameras: false
+  vision_projector:
+    name: null
+  action_tokenizer: ${model.tokenizer._target_}
+  AT_CONFIG: ${model.tokenizer.vq_config}
+  vla_training_strategy: vla-full-train
+  backbone_lr_multiplier: 1.0
+  max_text_tokens: 160
+  num_input_images: ${eval:'${model.model_arch.cond_steps} * ${model.processor.num_output_cameras}'}
+  camera_size_config: ${model.processor.camera_size_config}
+  num_extra_image_tokens_per_camera: 0
+  use_lm_head: true
+  discrete_action: true
+  continuous_action: true
+  return_continuous_action: true
+  action_attend_cot: false
+  predict_cot: false
+  max_chunk_token_length: 1200
+  max_pad_token_length: null
+  input_preprocessor:
+    input_action_corruption: false
+    pred_eov: false
+    batchify_action: true
+    pi05_ft_mode: false
+  ae_vlm_condition_mode: cross_attn_only
+prefetch_factor: 2
+constant_end_ratio: 0.5
+warmup_ratio: 0.05
+processor:
+  _target_: g05.data_processor.processor.galaxea_cot_processor.GalaxeaCoTProcessor
+  num_obs_steps: 1
+  discrete_action: ${model.model_arch.discrete_action}
+  use_stepwise_action_norm: true
+  num_output_cameras: 3
+  use_zh_instruction: false
+  drop_high_level_prob: 1.0
+  pad_token_id: ${model.model_arch.pad_token_id}
+  image_token_index: ${model.model_arch.image_token_index}
+  tokenizer_params:
+    pretrained_model_name_or_path: ${model.model_arch.hf_processor_path}
+    token: null
+  max_text_tokens: ${model.model_arch.max_text_tokens}
+  num_input_cameras: 3
+  camera_size_config:
+    exterior:
+    - 256
+    - 256
+    wrist_left:
+    - 256
+    - 256
+    wrist_right:
+    - 256
+    - 256
+  action_state_merger:
+    _target_: g05.data_processor.transforms.action_state_merger.GroupedPaddingMerger
+    merge: true
+    max_action_shape_meta: ${oc.load:configs/data/parts_meta/dual_arm_grouped_0409.yaml,parts_meta}
+    max_state_shape_meta: ${oc.load:configs/data/parts_meta/dual_arm_grouped_0409.yaml,parts_meta}
+    merge_spec: ${oc.load:configs/data/parts_meta/dual_arm_grouped_0409.yaml,merge_spec}

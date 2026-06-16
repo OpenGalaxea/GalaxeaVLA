@@ -1,0 +1,39 @@
+# Single source of truth for gripper-only whole-body parts_meta map.
+# Used by tokenizer (vq_config.parts_meta, vq_config.model_arch.parts_meta)
+# and processor (action_state_merger.max_action_shape_meta, max_state_shape_meta).
+# Usage: ${oc.load:configs/data/parts_meta/gripper_wbc.yaml,parts_meta}
+parts_meta:
+  left_arm: 8
+  right_arm: 8
+  left_gripper: 1
+  right_gripper: 1
+  left_ee_pose: 9
+  right_ee_pose: 9
+  torso: 4
+  torso.velocities: 6
+  chassis: 3
+  chassis.velocities: 6
+
+# WBC 3-group merge spec: 10 parts -> 3 merged groups, without hand slots.
+# Each group has slots; each slot has mutually exclusive alternatives.
+# Merged dim = sum(max(alt dims) per slot).
+merge_spec:
+  left_limb:
+    control:
+      arm: left_arm
+      ee_pose: left_ee_pose
+    end_effector:
+      gripper: left_gripper
+  right_limb:
+    control:
+      arm: right_arm
+      ee_pose: right_ee_pose
+    end_effector:
+      gripper: right_gripper
+  others:
+    torso:
+      position: torso
+      velocity: torso.velocities
+    chassis:
+      position: chassis
+      velocity: chassis.velocities

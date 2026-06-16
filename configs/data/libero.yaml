@@ -1,0 +1,157 @@
+_target_: g05.data.mixture_lerobot_dataset.MixtureLerobotDataset
+use_weight_normalization: true
+use_weight_for_sampling: false
+action_size: 32
+past_action_size: 0
+obs_size: 1
+val_set_proportion: 0.0001
+is_training_set: true
+embodiment_datasets:
+  libero:
+    type: g05.data.base_lerobot_datasetV3.BaseLerobotDatasetV3
+    embodiment_type: libero
+    lerobot_ds_version: '3.0'
+    shape_meta:
+      action:
+      - key: right_ee_pose
+        lerobot_key: action
+        start_index: 0
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: right_gripper
+        lerobot_key: action
+        start_index: 6
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      state:
+      - key: right_ee_pose
+        lerobot_key: observation.state
+        start_index: 0
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: right_gripper
+        lerobot_key: observation.state
+        start_index: 6
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      images:
+      - key: image
+        camera_type: exterior
+        lerobot_key: observation.images.image
+        start_index: 0
+        raw_shape:
+        - 3
+        - 512
+        - 512
+        shape:
+        - 3
+        - 224
+        - 224
+        time_offset: 0
+      - key: wrist_image
+        camera_type: wrist_right
+        lerobot_key: observation.images.wrist_image
+        start_index: 0
+        raw_shape:
+        - 3
+        - 512
+        - 512
+        shape:
+        - 3
+        - 224
+        - 224
+        time_offset: 0
+    dataset_groups:
+    - weight: 1.0
+      dataset_dirs:
+      - data/libero/libero_10_no_noops_lerobot
+      - data/libero/libero_goal_no_noops_lerobot
+      - data/libero/libero_object_no_noops_lerobot
+      - data/libero/libero_spatial_no_noops_lerobot
+processors:
+  libero:
+    shape_meta:
+      action:
+      - key: right_ee_pose
+        lerobot_key: action
+        start_index: 0
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: right_gripper
+        lerobot_key: action
+        start_index: 6
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      state:
+      - key: right_ee_pose
+        lerobot_key: observation.state
+        start_index: 0
+        raw_shape: 6
+        shape: 6
+        time_offset: 0
+      - key: right_gripper
+        lerobot_key: observation.state
+        start_index: 6
+        raw_shape: 1
+        shape: 1
+        time_offset: 0
+      images:
+      - key: image
+        camera_type: exterior
+        lerobot_key: observation.images.image
+        start_index: 0
+        raw_shape:
+        - 3
+        - 512
+        - 512
+        shape:
+        - 3
+        - 224
+        - 224
+        time_offset: 0
+      - key: wrist_image
+        camera_type: wrist_right
+        lerobot_key: observation.images.wrist_image
+        start_index: 0
+        raw_shape:
+        - 3
+        - 512
+        - 512
+        shape:
+        - 3
+        - 224
+        - 224
+        time_offset: 0
+    action_state_transforms: []
+    train_transforms:
+      image: ${oc.load:configs/data/_transforms.yaml,train_head}
+      wrist_image: ${oc.load:configs/data/_transforms.yaml,train_wrist}
+    val_transforms:
+      image: ${oc.load:configs/data/_transforms.yaml,val_exterior}
+      wrist_image: ${oc.load:configs/data/_transforms.yaml,val_wrist}
+    norm_default_mode: z-score
+    norm_exception_mode:
+      action:
+        right_gripper: q01/q99
+      state:
+        right_gripper: q01/q99
+    action_state_merger:
+      _target_: g05.data_processor.transforms.action_state_merger.PaddingActionMerger
+      merge: true
+      max_action_shape_meta: ${oc.load:configs/data/parts_meta/gripper_wbc.yaml,parts_meta}
+      max_state_shape_meta: ${oc.load:configs/data/parts_meta/gripper_wbc.yaml,parts_meta}
+    action_filter:
+      _target_: g05.data_processor.processor.galaxea_action_processor.R1LiteJointActionFilter
+      joint_threshold: 0.0
+      gripper_threshold: 0
+      eef_threshold: 0.0
+    num_obs_steps: 1
+    use_stepwise_action_norm: true
+    drop_high_level_prob: 1.0
+    use_zh_instruction: false

@@ -1,0 +1,12 @@
+# Requires Python >=3.10
+
+numpy
+opencv-python
+msgpack
+websockets
+typing-extensions
+toml
+loguru
+
+# Optional extras from pyproject.toml:
+# dev: pytest

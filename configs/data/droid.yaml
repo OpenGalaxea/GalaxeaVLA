@@ -1,0 +1,165 @@
+_target_: g05.data.mixture_lerobot_dataset.MixtureLerobotDataset
+use_weight_normalization: true
+use_weight_for_sampling: false
+action_size: 32
+past_action_size: 0
+obs_size: 1
+val_set_proportion: 0.05
+is_training_set: true
+embodiment_datasets:
+  Droid_Franka:
+    type: g05.data.droid.droid_lerobot_dataset.DroidLerobotDataset
+    embodiment_type: Droid_Franka
+    lerobot_ds_version: '3.0'
+    action_space: joint_position
+    filter_idle_actions: true
+    idle_threshold: 0.001
+    filter_failed_trajectories: true
+    random_swap_exterior_images: true
+    random_select_instruction: false
+    use_molmo_annotations: true
+    shape_meta:
+      action:
+      - key: right_arm
+        lerobot_key: action.joint_position
+        start_index: 0
+        raw_shape: 7
+        shape: 7
+      - key: right_gripper
+        lerobot_key: action.gripper_position
+        start_index: 0
+        raw_shape: 1
+        shape: 1
+      state:
+      - key: right_arm
+        lerobot_key: observation.state.joint_position
+        start_index: 0
+        raw_shape: 7
+        shape: 7
+      - key: right_gripper
+        lerobot_key: observation.state.gripper_position
+        start_index: 0
+        raw_shape: 1
+        shape: 1
+      images:
+      - key: exterior_image
+        camera_type: exterior
+        lerobot_key: observation.images.exterior_1_left
+        start_index: 0
+        raw_shape:
+        - 3
+        - 256
+        - 256
+        shape:
+        - 3
+        - 224
+        - 224
+      - key: wrist_image
+        camera_type: wrist_left
+        lerobot_key: observation.images.wrist_left
+        start_index: 0
+        raw_shape:
+        - 3
+        - 256
+        - 256
+        shape:
+        - 3
+        - 224
+        - 224
+      - key: dummy_wrist_right
+        camera_type: wrist_right
+        dummy: true
+        shape:
+        - 3
+        - 256
+        - 160
+    dataset_groups:
+    - weight: 1.0
+      dataset_dirs:
+      - data/droid/MolmoAct2-DROID-Dataset
+processors:
+  Droid_Franka:
+    shape_meta:
+      action:
+      - key: right_arm
+        lerobot_key: action.joint_position
+        start_index: 0
+        raw_shape: 7
+        shape: 7
+      - key: right_gripper
+        lerobot_key: action.gripper_position
+        start_index: 0
+        raw_shape: 1
+        shape: 1
+      state:
+      - key: right_arm
+        lerobot_key: observation.state.joint_position
+        start_index: 0
+        raw_shape: 7
+        shape: 7
+      - key: right_gripper
+        lerobot_key: observation.state.gripper_position
+        start_index: 0
+        raw_shape: 1
+        shape: 1
+      images:
+      - key: exterior_image
+        camera_type: exterior
+        lerobot_key: observation.images.exterior_1_left
+        start_index: 0
+        raw_shape:
+        - 3
+        - 256
+        - 256
+        shape:
+        - 3
+        - 224
+        - 224
+      - key: wrist_image
+        camera_type: wrist_left
+        lerobot_key: observation.images.wrist_left
+        start_index: 0
+        raw_shape:
+        - 3
+        - 256
+        - 256
+        shape:
+        - 3
+        - 224
+        - 224
+      - key: dummy_wrist_right
+        camera_type: wrist_right
+        dummy: true
+        shape:
+        - 3
+        - 256
+        - 160
+    action_state_transforms:
+    - _target_: g05.data_processor.transforms.relative_action.RelativeJointTransform
+      keys:
+      - right_arm
+    train_transforms:
+      wrist_image: ${oc.load:configs/data/_transforms.yaml,train_wrist}
+      exterior_image: ${oc.load:configs/data/_transforms.yaml,train_head}
+    val_transforms:
+      wrist_image: ${oc.load:configs/data/_transforms.yaml,val_wrist}
+      exterior_image: ${oc.load:configs/data/_transforms.yaml,val_exterior}
+    norm_default_mode: z-score
+    norm_exception_mode:
+      action:
+        right_gripper: q0001/q9999
+      state:
+        right_gripper: q0001/q9999
+    action_filter:
+      _target_: g05.data_processor.processor.galaxea_action_processor.R1LiteJointActionFilter
+      joint_threshold: 0.003
+      gripper_threshold: 0.01
+    action_state_merger:
+      _target_: g05.data_processor.transforms.action_state_merger.PaddingActionMerger
+      merge: true
+      max_action_shape_meta: ${oc.load:configs/data/parts_meta/gripper_wbc.yaml,parts_meta}
+      max_state_shape_meta: ${oc.load:configs/data/parts_meta/gripper_wbc.yaml,parts_meta}
+    num_obs_steps: 1
+    use_stepwise_action_norm: true
+    drop_high_level_prob: 1.0
+    use_zh_instruction: false

@@ -1,0 +1,73 @@
+# @package _global_
+defaults:
+- override /model: g05
+- override /tokenizer: actioncodec
+- override /data: bridge
+- _self_
+datastatics_path: data/stats/bridge_stats.json
+model:
+  vision:
+    temporal_freq: 1
+    spacetime_mode: factorized
+  use_torch_compile: false
+  use_8bit_optimizer: false
+  batch_size: 8
+  max_epochs: 12
+  max_steps: null
+  learning_rate: 3.0e-05
+  backbone_lr_multiplier: 1.0
+  weight_decay: 0.01
+  betas:
+  - 0.9
+  - 0.95
+  warmup_steps: 1000
+  num_workers: 8
+  find_unused_parameters: true
+  model_arch:
+    position_ids_type: gaussian
+    action_position_offset: null
+    ae_vlm_condition_mode: cross_attn_only
+    checkpoint_joint: false
+    checkpoint_vision: false
+    checkpoint_action_decoder: false
+    action_dim: 20
+    proprio_dim: 20
+    discrete_action: true
+    continuous_action: true
+    fm:
+      joint_training: true
+      fm_weight: 1.0
+      num_flow_samples: 8
+    ar:
+      block_wise_autoregressive: true
+      ce_weight: 1.0
+    input_preprocessor:
+      pred_eov: true
+    proprio_encoder: null
+  processor:
+    use_stepwise_action_norm: false
+    num_output_cameras: 1
+    num_input_cameras: 1
+    camera_size_config:
+      exterior:
+      - 256
+      - 256
+    norm_default_mode: q01/q99
+    vlm_input_action_norm_default_mode: null
+    vlm_input_action_norm_exception_mode: null
+    tokenizer_params:
+      local_files_only: true
+tokenizer:
+  vq_config:
+    block_wise_autoregressive: true
+    block_size: 9
+    dropout_noop_parts: true
+    model_arch:
+      codebook_size: 4096
+    num_residuals: 2
+    rule_based_key_patterns:
+    - gripper
+    rule_based_binarize_threshold: 0.0
+    use_group_markers: true
+    group_order_shuffle: false
+    absent_key_fill_value: -100.0
