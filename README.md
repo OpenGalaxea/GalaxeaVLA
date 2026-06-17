@@ -15,6 +15,8 @@
 
 ## 📢 News
 
+[Jun 17, 2026] We release the [checkpoint](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101) of **G0.5** for zero-shot inference deployment on so-100/101.
+
 [Jun 16, 2026] We provide zero-shot inference deployment entrypoints for the **G0.5** model on the R1 Lite and DROID embodiment, along with a LIBERO simulation evaluation entrypoint and R1 Lite/R1 Pro post-training fine-tuning support. Post-training support for more simulation benchmarks and zero-shot inference deployment on so100/101 will be released soon.
 
 [Jun 1, 2026] We introduce **G0.5**, our latest autoregressive VLA model with state-of-the-art performance. See the [Project Page](https://opengalaxea.github.io/G05/). Model weights and code are coming soon.
@@ -148,7 +150,7 @@ Before installation:
 | Model                  | Description                       | Checkpoint Path                                              |
 | ---------------------- | --------------------------------- | ------------------------------------------------------------ |
 | G05-base | Pretrained weights for fine-tuning and zero-shot deployment on R1 Lite | https://huggingface.co/OpenGalaxea/G05/tree/main/g05-base |
-| G05-so100 | For zero-shot deployment on SO-100 | [Coming Soon] |
+| G05-so101 | For zero-shot deployment on SO-100/101 | https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101 |
 | G05-droid | For zero-shot deployment on DROID | https://huggingface.co/OpenGalaxea/G05/tree/main/g05-droid |
 | G05-libero | For evaluation on LIBERO | https://huggingface.co/OpenGalaxea/G05/tree/main/g05-libero |
 

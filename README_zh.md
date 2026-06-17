@@ -15,6 +15,8 @@
 
 ## 📢 最新动态
 
+[2026 年 6 月 17 日] 我们提供了 **G0.5** 在 so-100/101 本体上零样本推理部署的[权重](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101)。
+
 [2026 年 6 月 16 日] 我们提供了 **G0.5** 模型在 R1 Lite 和 DROID 本体上的零样本推理部署入口，并提供 LIBERO 仿真评测入口和 R1 Lite/R1 Pro 后训练微调支持。更多仿真 benchmark 的后训练微调功能，以及 so100/101 本体的零样本推理部署入口将很快更新。
 
 [2026 年 6 月 1 日] 我们发布 **G0.5**，这是最新的自回归 VLA 模型，具备领先性能。请查看[项目主页](https://opengalaxea.github.io/G05/)。模型权重和代码即将发布。
@@ -114,7 +116,7 @@ uv pip install -e .[dev]
 | 模型                   | 说明                                         | 检查点路径       |
 | ---------------------- | -------------------------------------------- | ---------------- |
 | G05-base | 用于微调和 R1 Lite 零样本部署的预训练权重 | https://huggingface.co/OpenGalaxea/G05/tree/main/g05-base |
-| G05-so100 | 用于 SO-100 零样本部署 | [Coming Soon] |
+| G05-so101 | 用于 SO-100/101 零样本部署 | (https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101) |
 | G05-droid | 用于 DROID 零样本部署 | https://huggingface.co/OpenGalaxea/G05/tree/main/g05-droid |
 | G05-libero | 用于 LIBERO 评测 | https://huggingface.co/OpenGalaxea/G05/tree/main/g05-libero |
 
