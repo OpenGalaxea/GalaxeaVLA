@@ -53,6 +53,12 @@ Chunk cache behavior: the server uses action chunks and includes `need_obs` in r
 }
 ```
 
+The `action` dict contains **only the keys the model confidently predicted**. When
+the AR head drops a key (e.g. gripper on some chunks), that key is **absent from the
+dict** — the server does not fill it. The client knows its own expected key set and
+must handle any missing key itself (hold the last command, derive from current
+state, etc.). This keeps embodiment-specific gripper conventions out of the server.
+
 Error response:
 
 ```text

@@ -52,7 +52,6 @@ from g05.models.g05.inferencer import (
     PolicyInferencer,
     resolve_processor,
 )
-from experiments.libero.libero_eval_utils import LIBERO_GRIPPER_OPEN_QPOS_THRESHOLD
 
 import websockets
 
@@ -343,61 +342,11 @@ class ChunkedPolicyWrapper:
         self._cached_chunk = None  # {part: ndarray[chunk_size, dim]}
         self._chunk_step = 0
         self._cot_text = None  # str or None, from last recompute
-        self._gripper_keys = self._resolve_gripper_keys()
 
     @property
     def need_obs(self) -> bool:
         """Whether the next call to get_action needs a real observation."""
         return self._cached_chunk is None or self._chunk_step >= self.action_steps
-
-    def _resolve_gripper_keys(self) -> dict[str, int]:
-        processors = (
-            self.processor.processors
-            if hasattr(self.processor, "processors")
-            else {"_": self.processor}
-        )
-        result: dict[str, int] = {}
-        for proc in processors.values():
-            merger = getattr(proc, "action_state_merger", None)
-            meta = getattr(merger, "max_action_shape_meta", None)
-            if isinstance(meta, dict):
-                for key, dim in meta.items():
-                    if "gripper" in key:
-                        result[key] = int(dim)
-        return result
-
-    def _current_gripper_action_value(self, raw_obs: dict, key: str) -> float:
-        state = raw_obs.get("state", {}) if isinstance(raw_obs, dict) else {}
-        if key not in state:
-            return 0.0
-        scalar = float(np.asarray(state[key], dtype=np.float32).reshape(-1)[0])
-        return 1.0 if scalar >= LIBERO_GRIPPER_OPEN_QPOS_THRESHOLD else 0.0
-
-    def _mark_absent_gripper(self, action: dict, absent_keys: set[str], raw_obs: dict) -> dict:
-        absent_grippers = absent_keys & set(self._gripper_keys)
-        if not absent_grippers:
-            return action
-        sample_val = next(v for k, v in action.items() if not str(k).startswith("_"))
-        is_tensor = isinstance(sample_val, torch.Tensor)
-        horizon = sample_val.shape[1] if is_tensor else sample_val.shape[0]
-        device = sample_val.device if is_tensor else None
-        for key in absent_grippers:
-            dim = self._gripper_keys[key]
-            fill_value = self._current_gripper_action_value(raw_obs, key)
-            if is_tensor:
-                action[key] = torch.full(
-                    (1, horizon, dim),
-                    fill_value,
-                    dtype=torch.float32,
-                    device=device,
-                )
-            else:
-                action[key] = np.full(
-                    (horizon, dim),
-                    fill_value,
-                    dtype=np.float32,
-                )
-        return action
 
     async def get_action(self, raw_obs: dict) -> tuple[dict, str | None]:
         """Return single-step action ``{part: ndarray[dim]}``.
@@ -413,8 +362,19 @@ class ChunkedPolicyWrapper:
             actions = await asyncio.to_thread(self.inferencer.infer, [obs_dict])
             action = actions[0]
             self._cot_text = action.pop("_cot_text", None)
+            # Drop keys the AR head did not confidently predict. The protocol
+            # returns only predicted keys; each client fills/holds missing keys
+            # itself (it knows its own expected key set). Generalizes beyond
+            # gripper to any absent action part.
             absent_keys = action.pop("_absent_keys", set())
-            action = self._mark_absent_gripper(action, absent_keys, raw_obs)
+            for key in absent_keys:
+                action.pop(key, None)
+            if absent_keys:
+                logger.warning(
+                    "Dropped absent action keys %s (emb=%s); client must handle missing keys.",
+                    sorted(absent_keys),
+                    raw_obs.get("embodiment_type", "?"),
+                )
             self._cached_chunk = dict_apply(
                 action, lambda x: x[0].numpy() if isinstance(x, torch.Tensor) else x
             )

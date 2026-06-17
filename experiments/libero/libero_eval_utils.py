@@ -304,18 +304,29 @@ def single_action_to_libero_action(
 
     pose_key = next((key for key in action_keys if key.endswith("ee_pose")), None)
     gripper_key = next((key for key in action_keys if key.endswith("gripper")), None)
-    if pose_key is None or gripper_key is None:
+    if pose_key is None:
         raise ValueError(f"Unsupported LIBERO action keys: {action_keys}")
 
     pose = np.asarray(action_dict[pose_key], dtype=np.float32).reshape(-1)
-    gripper = np.asarray(action_dict[gripper_key], dtype=np.float32).reshape(-1)
     if pose.size != 6:
         raise ValueError(f"LIBERO ee_pose single action must be 6-dim, got {pose.size}")
-    gripper_cmd = (
-        gripper_state.command_for_policy_value(gripper[0], obs=obs)
-        if gripper_state is not None
-        else gripper_to_libero_command(gripper[0], obs=obs)
-    )
+
+    if gripper_key is None:
+        # The server returns only confidently-predicted keys; a missing gripper
+        # means the AR head dropped it this chunk. Hold the last commanded
+        # gripper value (the hold sentinel resolves to current_command / obs).
+        gripper_cmd = (
+            gripper_state.command_for_policy_value(LIBERO_GRIPPER_HOLD_SENTINEL, obs=obs)
+            if gripper_state is not None
+            else libero_gripper_state_to_command(obs)
+        )
+    else:
+        gripper = np.asarray(action_dict[gripper_key], dtype=np.float32).reshape(-1)
+        gripper_cmd = (
+            gripper_state.command_for_policy_value(gripper[0], obs=obs)
+            if gripper_state is not None
+            else gripper_to_libero_command(gripper[0], obs=obs)
+        )
     return np.concatenate([pose, [gripper_cmd]]).astype(np.float32).tolist()
 
 

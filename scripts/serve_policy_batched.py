@@ -55,7 +55,6 @@ from scripts.serve_policy import (
     _serialize_error,
     setup,
 )
-from experiments.libero.libero_eval_utils import LIBERO_GRIPPER_OPEN_QPOS_THRESHOLD
 
 logger = logging.getLogger(__name__)
 
@@ -260,7 +259,6 @@ class ChunkedPolicyWrapper:
         *,
         action_steps: int = 16,
         request_timeout_s: float = 30.0,
-        default_gripper_value: float = 1.0,
     ):
         self.batcher = batcher
         self.processor = processor
@@ -270,8 +268,6 @@ class ChunkedPolicyWrapper:
         self._chunk_step = 0
         self._cot_text = None
         self._last_raw_chunk: dict | None = None
-        self._default_gripper_value = default_gripper_value
-        self._gripper_keys = self._resolve_gripper_keys()
 
     @property
     def need_obs(self) -> bool:
@@ -288,58 +284,6 @@ class ChunkedPolicyWrapper:
     def full_chunk(self) -> dict | None:
         return self._last_raw_chunk
 
-    def _resolve_gripper_keys(self) -> dict[str, int]:
-        result: dict[str, int] = {}
-        procs = {}
-        if hasattr(self.processor, "processors"):
-            procs = self.processor.processors
-        else:
-            procs = {"_": self.processor}
-        for _name, proc in procs.items():
-            merger = getattr(proc, "action_state_merger", None)
-            meta = getattr(merger, "max_action_shape_meta", None)
-            if meta and isinstance(meta, dict):
-                for k, dim in meta.items():
-                    if "gripper" in k:
-                        result[k] = dim
-        return result
-
-    def _current_gripper_action_value(self, raw_obs: dict, key: str) -> float:
-        state = raw_obs.get("state", {}) if isinstance(raw_obs, dict) else {}
-        if key not in state:
-            return float(self._default_gripper_value)
-        scalar = float(np.asarray(state[key], dtype=np.float32).reshape(-1)[0])
-        return 1.0 if scalar >= LIBERO_GRIPPER_OPEN_QPOS_THRESHOLD else 0.0
-
-    def _mark_absent_gripper(self, action: dict, absent_keys: set[str], raw_obs: dict) -> dict:
-        absent_grippers = absent_keys & set(self._gripper_keys.keys())
-        if not absent_grippers:
-            return action
-        sample_val = next(v for k, v in action.items() if not str(k).startswith("_"))
-        is_tensor = isinstance(sample_val, torch.Tensor)
-        if is_tensor:
-            horizon = sample_val.shape[1]
-            device = sample_val.device
-        else:
-            horizon = sample_val.shape[0]
-        for gk in absent_grippers:
-            gdim = self._gripper_keys[gk]
-            fill_value = self._current_gripper_action_value(raw_obs, gk)
-            if is_tensor:
-                action[gk] = torch.full(
-                    (1, horizon, gdim),
-                    fill_value,
-                    dtype=torch.float32,
-                    device=device,
-                )
-            else:
-                action[gk] = np.full(
-                    (horizon, gdim),
-                    fill_value,
-                    dtype=np.float32,
-                )
-        return action
-
     async def get_action(self, raw_obs: dict) -> tuple[dict, str | None]:
         self._last_raw_chunk = None
         if self.need_obs:
@@ -352,8 +296,17 @@ class ChunkedPolicyWrapper:
             except asyncio.TimeoutError:
                 raise TimeoutError(f"Inference request timed out after {self.request_timeout_s}s")
             self._cot_text = action.pop("_cot_text", None)
+            # Drop keys the AR head did not confidently predict; clients fill
+            # missing keys themselves (see serve_policy.py for rationale).
             absent_keys = action.pop("_absent_keys", set())
-            action = self._mark_absent_gripper(action, absent_keys, raw_obs)
+            for key in absent_keys:
+                action.pop(key, None)
+            if absent_keys:
+                logger.warning(
+                    "Dropped absent action keys %s (emb=%s); client must handle missing keys.",
+                    sorted(absent_keys),
+                    raw_obs.get("embodiment_type", "?"),
+                )
             self._cached_chunk = dict_apply(
                 action,
                 lambda x: x[0].numpy() if isinstance(x, torch.Tensor) else x,
@@ -395,7 +348,6 @@ class EnsembleChunkedPolicyWrapper:
         *,
         action_steps: int = 16,
         request_timeout_s: float = 30.0,
-        default_gripper_value: float = 1.0,
     ):
         self.batcher = batcher
         self.processor = processor
@@ -407,64 +359,10 @@ class EnsembleChunkedPolicyWrapper:
         self._ensemble_buf: dict[str, dict[int, deque]] = {}
         self._last_raw_chunk: dict | None = None
         self._cot_text = None
-        self._default_gripper_value = default_gripper_value
-        self._gripper_keys = self._resolve_gripper_keys()
 
     def set_step(self, step: int) -> None:
         self._global_step = step
         self._steps_since_recompute = step - self._last_recompute_step
-
-    def _resolve_gripper_keys(self) -> dict[str, int]:
-        result: dict[str, int] = {}
-        procs = {}
-        if hasattr(self.processor, "processors"):
-            procs = self.processor.processors
-        else:
-            procs = {"_": self.processor}
-        for _name, proc in procs.items():
-            merger = getattr(proc, "action_state_merger", None)
-            meta = getattr(merger, "max_action_shape_meta", None)
-            if meta and isinstance(meta, dict):
-                for k, dim in meta.items():
-                    if "gripper" in k:
-                        result[k] = dim
-        return result
-
-    def _current_gripper_action_value(self, raw_obs: dict, key: str) -> float:
-        state = raw_obs.get("state", {}) if isinstance(raw_obs, dict) else {}
-        if key not in state:
-            return float(self._default_gripper_value)
-        scalar = float(np.asarray(state[key], dtype=np.float32).reshape(-1)[0])
-        return 1.0 if scalar >= LIBERO_GRIPPER_OPEN_QPOS_THRESHOLD else 0.0
-
-    def _mark_absent_gripper(self, action: dict, absent_keys: set[str], raw_obs: dict) -> dict:
-        absent_grippers = absent_keys & set(self._gripper_keys.keys())
-        if not absent_grippers:
-            return action
-        sample_val = next(v for k, v in action.items() if not str(k).startswith("_"))
-        is_tensor = isinstance(sample_val, torch.Tensor)
-        if is_tensor:
-            horizon = sample_val.shape[1]
-            device = sample_val.device
-        else:
-            horizon = sample_val.shape[0]
-        for gk in absent_grippers:
-            gdim = self._gripper_keys[gk]
-            fill_value = self._current_gripper_action_value(raw_obs, gk)
-            if is_tensor:
-                action[gk] = torch.full(
-                    (1, horizon, gdim),
-                    fill_value,
-                    dtype=torch.float32,
-                    device=device,
-                )
-            else:
-                action[gk] = np.full(
-                    (horizon, gdim),
-                    fill_value,
-                    dtype=np.float32,
-                )
-        return action
 
     @property
     def need_obs(self) -> bool:
@@ -493,8 +391,17 @@ class EnsembleChunkedPolicyWrapper:
             except asyncio.TimeoutError:
                 raise TimeoutError(f"Inference request timed out after {self.request_timeout_s}s")
             self._cot_text = action.pop("_cot_text", None)
+            # Drop keys the AR head did not confidently predict; clients fill
+            # missing keys themselves (see serve_policy.py for rationale).
             absent_keys = action.pop("_absent_keys", set())
-            action = self._mark_absent_gripper(action, absent_keys, raw_obs)
+            for key in absent_keys:
+                action.pop(key, None)
+            if absent_keys:
+                logger.warning(
+                    "Dropped absent action keys %s (emb=%s); client must handle missing keys.",
+                    sorted(absent_keys),
+                    raw_obs.get("embodiment_type", "?"),
+                )
             chunk = dict_apply(
                 action,
                 lambda x: x[0].numpy() if isinstance(x, torch.Tensor) else x,

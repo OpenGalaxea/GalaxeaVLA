@@ -52,6 +52,11 @@ msgpack dict:
   "cot_text": <str>,                # 可选:CoT 推理文本(BBox / Subtask / Action token)
 }
 ```
+
+> `action` dict **只包含模型置信预测的 key**。当 AR 头某些 chunk 没预测某个 key(如 gripper)时,
+> 该 key **不会出现在 dict 里**,server 不做填充。client 自己知道期望哪些 key,缺失的 key 由 client
+> 自行处理(保持上次命令、从当前 state 推导等)。这样 embodiment 专属的 gripper 约定就不会进 server。
+
 或错误:
 ```
 { "error": { "code": <int>, "message": <str> } }

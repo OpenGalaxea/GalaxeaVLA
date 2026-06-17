@@ -1,0 +1,3 @@
+[submodule "experiments/droid/droid-franka-client"]
+	path = experiments/droid/droid-franka-client
+	url = git@gitlab.galaxea-ai.com:foundationmodel/droid-client.git
