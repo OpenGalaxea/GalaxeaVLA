@@ -7,12 +7,12 @@ name = "g05"
 authors = [
     {name = "GalaxeaAI", email="yicheng.liu@galaxea.ai"},
 ]
-description = "G0.5: Galaxea Foundation Model"
+description = "GalaxeaVLA: G0.5 Vision-Language-Action Model"
 version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.10.16,<3.11"
 keywords = ["vision-language-actions models", "multimodal pretraining", "robot learning"]
-license = {file = "LICENSE"}
+license = {file = "LICENSE-G0.5"}
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -162,11 +162,6 @@ exclude = ["cache"]
 
 [tool.setuptools.package-data]
 "g05" = ["py.typed"]
-
-[tool.uv.workspace]
-members = [
-    "g05",
-]
 
 [tool.uv.pip]
 index-strategy = "unsafe-best-match"

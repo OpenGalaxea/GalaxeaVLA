@@ -1,4 +1,4 @@
-# Galaxea G0.5 VLA Model
+# GalaxeaVLA: G0.5 Vision-Language-Action Model
 
 [![Project Page](https://img.shields.io/badge/Project%20Page-000000?style=for-the-badge&logo=github)](https://opengalaxea.github.io/G05/)
 [![Paper](https://img.shields.io/badge/Paper-8A2BE2?style=for-the-badge&logo=arxiv)](https://opengalaxea.github.io/G05/Galaxea_G0_5.pdf)
@@ -78,9 +78,13 @@ Key ideas from the G0.5 technical report:
   <em>G0.5 Token Sequence Template</em>
 </p>
 
-## 📌 G0Plus Overview
+## 📌 Legacy G0 / G0Plus Overview
 
-**G0Plus** is an open-source project dedicated to advancing real-world, long-horizon, and few-shot robot manipulation.
+This section preserves the G0Plus overview from earlier GalaxeaVLA releases for continuity. G0Plus and G0Tiny belong to the legacy G0/G0Plus release line. The current branch focuses on G0.5, and no longer includes the legacy G0Plus Dockerfiles, Fold Towels/Handover Gift demo guides, or pi0/pi0fast training configs.
+
+For the exact legacy README and file layout, use commit [13a16a9](https://github.com/OpenGalaxea/GalaxeaVLA/tree/13a16a9049aee8f1d799b56fccc0c5832a75fc2f). Historical checkpoints remain available in the [G0-VLA Hugging Face repository](https://huggingface.co/OpenGalaxea/G0-VLA), including `G0Plus_3B_base`, `G0Tiny_260120`, and `G0Plus_PP_CKPT`.
+
+**G0Plus** was an open-source project dedicated to advancing real-world, long-horizon, and few-shot robot manipulation.
 
 1. **Galaxea Open-World Dataset**
    - **500+ hours** of real-world mobile manipulation data.
@@ -90,16 +94,15 @@ Key ideas from the G0.5 technical report:
    - Dataset in **RLDS/LeRobot** format.
 
 2. **Easy-to-Use Fine-Tuning Framework**
-   - Fully compatible with the [LeRobot](https://github.com/huggingface/lerobot) dataset format and scalable to large, real-world datasets.
-   - Modular design enables easy extension and adaptation for new tasks and environments.
+   - Compatible with the [LeRobot](https://github.com/huggingface/lerobot) dataset format and scalable to large real-world datasets.
+   - Modular design for extension and adaptation to new tasks and environments.
 
-3. **Model Checkpoints & An Out-of-the-Box Demo!**
-   - **G0Plus_3B-base**: A powerful pre-trained model with **2k hours+** real-world robot data for fine-tuning on custom tasks.
-   - **G0Tiny_250M-base**: A lightweight pre-trained model with **1k hours** of R1 Pro VR teleoperation data, with only **250M** parameters for on-device deployment on the R1 Pro Orin platform.
-   - **G0Plus_3B-pick_and_place**: A deployment-ready checkpoint, post-trained for robust pick-and-place performance in the wild.
-   - **Out-of-the-Box Pick Up Anything Demo**: a Dockerfile and step-by-step guides for quick setup and reproducible experiments.
-   - **Out-of-the-Box Fold Towels Demo**: a Dockerfile and step-by-step guides for quick setup and reproducible experiments.
-   - **Out-of-the-Box Handover Gift Demo**: a step-by-step guide for on-device G0Tiny VLA inference on R1 Pro Orin.
+3. **Model Checkpoints and Legacy Demos**
+   - **G0Plus_3B-base**: pretrained with **2k+ hours** of real-world robot data for fine-tuning on custom tasks.
+   - **G0Tiny_250M-base**: lightweight pretrained model with **1k hours** of R1 Pro VR teleoperation data, designed for R1 Pro Orin edge deployment.
+   - **G0Plus_3B-pick_and_place**: post-trained checkpoint for pick-and-place deployment.
+   - Legacy demos included Pick Up Anything, Fold Towels, and Handover Gift.
+   - openpi-based **pi0/pi0fast** fine-tuning support was documented in the legacy release.
 
 ## 🚀 Galaxea Open-World Dataset
 
@@ -118,7 +121,9 @@ See more dataset (formats and examples) details [here](docs/data/schema.md).
 
 ### GPU Requirements
 
-To run our pretrained models in this repository, you need an NVIDIA GPU with at least the following specifications. These estimates assume a single GPU, but you can also use multiple GPUs with model parallelism to reduce per-GPU memory requirements by configuring `--nnodes` and `--nproc-per-node` in the fine-tuning launch script.
+To run the pretrained G0.5 models in this repository, you need an NVIDIA GPU with at least the following specifications. These estimates assume a single GPU.
+
+Multi-GPU fine-tuning launched through [scripts/run/finetune.sh](scripts/run/finetune.sh) uses `torchrun` distributed data parallelism by default. This improves throughput, but each GPU keeps a full model replica and it should not be described as model parallelism or as a way to reduce per-GPU model memory. Multi-node runs are controlled by environment variables such as `WORLD_SIZE`, `RANK`, `MASTER_ADDR`, and `MASTER_PORT`.
 
 | Mode               | Memory Required | Example GPU              |
 | ------------------ | --------------- | ------------------------ |
@@ -127,14 +132,25 @@ To run our pretrained models in this repository, you need an NVIDIA GPU with at 
 
 ### Installation
 
+Tested environment:
+
+- Linux
+- Python `>=3.10.16,<3.11`
+- CUDA 12.8 with PyTorch 2.7.1 wheels from the `cu128` index
+- Native CUDA extensions including `flash-attn-4` and `flash-linear-attention`; make sure your CUDA runtime, compiler toolchain, and PyTorch build match
+- `ffmpeg` for video-backed datasets and evaluation
+
 ```bash
 git clone https://github.com/OpenGalaxea/GalaxeaVLA
 cd GalaxeaVLA
-uv sync --index-strategy unsafe-best-match
-source .venv/bin/activate
 
-uv pip install -e .
-uv pip install -e .[dev]
+# Runtime environment
+uv sync --index-strategy unsafe-best-match
+
+# Or include development/test dependencies instead
+uv sync --extra dev --index-strategy unsafe-best-match
+
+source .venv/bin/activate
 ```
 Before installation:
 1. We recommend [installing uv](https://docs.astral.sh/uv/getting-started/installation/) without using a conda environment.
@@ -147,17 +163,61 @@ Before installation:
 
 ### Model Checkpoints
 
-| Model                  | Description                       | Checkpoint Path                                              |
-| ---------------------- | --------------------------------- | ------------------------------------------------------------ |
-| G05-base | Pretrained weights for fine-tuning and zero-shot deployment on R1 Lite | https://huggingface.co/OpenGalaxea/G05/tree/main/g05-base |
-| G05-so101 | For zero-shot deployment on SO-100/101 | https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101 |
-| G05-droid | For zero-shot deployment on DROID | https://huggingface.co/OpenGalaxea/G05/tree/main/g05-droid |
-| G05-libero | For evaluation on LIBERO | https://huggingface.co/OpenGalaxea/G05/tree/main/g05-libero |
+Download the Hugging Face repository into `checkpoints/` so the local paths match the checked-in configs:
+
+```bash
+huggingface-cli download OpenGalaxea/G05 \
+    --repo-type model \
+    --local-dir checkpoints \
+    --local-dir-use-symlinks False
+```
+
+Expected local layout after download:
+
+```text
+checkpoints/
+├── action_tokenizer.pt
+├── qwen3_5_2b_base_processor/
+├── g05-base/
+│   ├── .hydra/config.yaml
+│   ├── checkpoints/model_state_dict.pt
+│   └── dataset_stats.json
+├── g05-so101/
+│   ├── .hydra/config.yaml
+│   ├── checkpoints/model_state_dict.pt
+│   └── dataset_stats.json
+├── g05-droid/
+│   ├── .hydra/config.yaml
+│   ├── checkpoints/model_state_dict.pt
+│   └── dataset_stats.json
+└── g05-libero/
+    ├── .hydra/config.yaml
+    ├── model.pt
+    └── dataset_stats.json
+```
+
+The full set is about 44 GB. Each G0.5 model checkpoint is about 11 GB, the shared `action_tokenizer.pt` is about 484 MB, and `qwen3_5_2b_base_processor/` is about 22 MB.
+
+| Model | Use | Local `--ckpt_path` |
+| ----- | --- | ------------------- |
+| [G05-base](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-base) | Fine-tuning and R1 Lite zero-shot deployment | `checkpoints/g05-base/checkpoints/model_state_dict.pt` |
+| [G05-so101](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101) | SO-100/101 zero-shot deployment | `checkpoints/g05-so101/checkpoints/model_state_dict.pt` |
+| [G05-droid](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-droid) | DROID zero-shot deployment | `checkpoints/g05-droid/checkpoints/model_state_dict.pt` |
+| [G05-libero](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-libero) | LIBERO evaluation | `checkpoints/g05-libero/model.pt` |
+
+Keep each checkpoint's `.hydra/config.yaml` and `dataset_stats.json` next to the downloaded weights. The inference and evaluation entrypoints resolve `dataset_stats.json` from the checkpoint run directory, and the configs expect the shared processor at `checkpoints/qwen3_5_2b_base_processor` and the shared tokenizer at `checkpoints/action_tokenizer.pt`.
+
+For LIBERO, the exported config expects bundle-local sidecars. The `eval_libero.sh` command below requires these paths. If they are not included by your download tool, create symlinks:
+
+```bash
+ln -sf ../action_tokenizer.pt checkpoints/g05-libero/action_tokenizer.pt
+ln -sfn ../qwen3_5_2b_base_processor checkpoints/g05-libero/hf_processor
+```
 
 
 ### Inference on Real Robots
 
-Real-robot deployment follows a server/client architecture. The GPU machine runs the G05 policy server from this repository, while the robot-side client collects raw observations, sends them over WebSocket + msgpack, receives action chunks, and executes them.
+Real-robot deployment follows a server/client architecture. The GPU machine runs the G0.5 policy server from this repository, while the robot-side client collects raw observations, sends them over WebSocket + msgpack, receives action chunks, and executes them.
 
 #### R1 Lite
 
@@ -165,7 +225,7 @@ Start the policy server on the GPU machine:
 
 ```bash
 python scripts/serve_policy.py \
-    --ckpt_path /path/to/checkpoints/model_state_dict.pt \
+    --ckpt_path checkpoints/g05-base/checkpoints/model_state_dict.pt \
     --host 0.0.0.0 \
     --port 8080 \
     --device cuda \
@@ -186,10 +246,15 @@ See [experiments/r1lite/README.md](experiments/r1lite/README.md) for the ROS2 to
 
 #### SO-100 / SO-101
 
-SO-100 deployment uses the same G05 policy server with a lightweight LeRobot-based client:
+SO-100/101 deployment uses the same G0.5 policy server with a lightweight LeRobot-based client. Start the policy server on the GPU machine:
 
 ```bash
-bash experiments/so100/start_server.sh /path/to/checkpoint.pt
+bash experiments/so100/start_server.sh checkpoints/g05-so101/checkpoints/model_state_dict.pt
+```
+
+Then set up and start the robot-side client in a separate terminal or on the robot machine:
+
+```bash
 conda env create -f experiments/so100/environment.yml
 conda activate lerobot
 bash experiments/so100/start_client.sh
@@ -199,10 +264,10 @@ Before running the client, update the camera indices and camera-slot mapping in 
 
 #### DROID / Franka
 
-DROID deployment serves the G05 policy from this repo and uses a separate Franka client repo for robot control:
+DROID deployment serves the G0.5 policy from this repo and uses a separate Franka client repo for robot control:
 
 ```bash
-CHECKPOINT_DIR=/path/to/g05_droid \
+CHECKPOINT_DIR=checkpoints/g05-droid \
 POLICY_PORT=8000 \
 POLICY_DEVICE=cuda:0 \
 bash experiments/droid/start_server.sh \
@@ -213,10 +278,10 @@ See [experiments/droid/README.md](experiments/droid/README.md) and [experiments/
 
 ### Evaluation on LIBERO
 
-LIBERO evaluation also uses a server/client setup: a batched policy server runs on one GPU, and one parallel client is launched for each LIBERO suite.
+LIBERO evaluation also uses a server/client setup. This command starts a batched policy server in the background, launches one parallel client for each LIBERO suite, then stops the server after evaluation.
 
 ```bash
-bash scripts/run/eval_libero.sh /path/to/checkpoint.pt \
+bash scripts/run/eval_libero.sh checkpoints/g05-libero/model.pt \
     --num_trials 50 \
     --num_parallel 10 \
     --save_videos
@@ -228,12 +293,14 @@ See [experiments/libero/README.md](experiments/libero/README.md) for LIBERO inst
 
 ### 🔥 Fine-Tuning Base Models on Galaxea Robots
 
-To fine-tune our models with your own data, follow four steps:
+To fine-tune our models with your own data, follow four steps. See [configs/QUICK_START.md](configs/QUICK_START.md) for the config hierarchy and common edit locations.
 
-1. Create or adapt a task config under `configs/task/`. For Galaxea robot fine-tuning, start from one of the provided configs:
+1. Create or adapt a task config under `configs/task/`, and update the matching dataset paths under `configs/data/`. For Galaxea robot fine-tuning, start from one of the provided configs:
    - R1 Lite: [configs/task/r1lite.yaml](configs/task/r1lite.yaml) with dataset paths in [configs/data/r1lite.yaml](configs/data/r1lite.yaml).
    - R1 Pro joint-space training: [configs/task/r1pro.yaml](configs/task/r1pro.yaml) with dataset paths in [configs/data/r1pro.yaml](configs/data/r1pro.yaml).
    - R1 Pro whole-body-control training with torso state/action: [configs/task/r1pro_wbc.yaml](configs/task/r1pro_wbc.yaml) with dataset paths in [configs/data/r1pro_wbc.yaml](configs/data/r1pro_wbc.yaml).
+
+   The R1 Pro defaults use example dataset paths such as `data/r1pro/fold_carton_lerobot`. Replace them with your local LeRobot dataset directories before training. `r1pro.yaml` and `r1pro_wbc.yaml` currently set `model.max_steps: 50`, which is a smoke-test default rather than a full training schedule; increase `model.max_steps` or set `model.max_epochs` for real runs.
 
 2. Install the required packages.
 
@@ -259,9 +326,10 @@ To fine-tune our models with your own data, follow four steps:
     export SWANLAB_API_KEY=<YOUR_SWANLAB_API_KEY>
     ```
 
-    The repository-local `.env` file is a placeholder template for machine-specific paths and API keys. Fill in the placeholders locally, then source it before launching training or evaluation:
+    Copy the repository-local environment template and fill in machine-specific paths and optional API keys:
 
     ```bash
+    cp .env.example .env
     source .env
     ```
 
@@ -270,7 +338,13 @@ To fine-tune our models with your own data, follow four steps:
    ```bash
    bash scripts/run/finetune.sh <num_of_gpu> <task_path>
 
-   # examples:
+   # dry-run: resolve config and exit before training
+   bash scripts/run/finetune.sh 1 r1pro --dry-run --max_datasets 1
+
+   # single-GPU smoke test
+   bash scripts/run/finetune.sh 1 r1pro --test --max_datasets 1 model.max_steps=10
+
+   # multi-GPU examples:
    bash scripts/run/finetune.sh 8 r1lite
    bash scripts/run/finetune.sh 8 r1pro
    bash scripts/run/finetune.sh 8 r1pro_wbc
@@ -297,6 +371,18 @@ To fine-tune our models with your own data, follow four steps:
 4. Q: Why am I getting an out-of-memory (OOM) error?
 
    A: Make sure you have enough GPU memory as mentioned above. Alternatively, reduce `model.batch_size` in the corresponding task config under [configs/task](configs/task).
+
+### Minimal Validation
+
+After installation and checkpoint download, run lightweight checks before launching expensive jobs:
+
+```bash
+python tools/resolve_config.py r1pro --key model.model_arch
+python tools/resolve_config.py r1pro --key data.embodiment_datasets.galaxea_r1pro.dataset_groups
+python -c "import torch, g05; print(torch.__version__); print(g05.__file__)"
+```
+
+Tests are split by their runtime requirements. Synthetic/unit tests can run without real robot data, while serving, pretrained-policy, and dataset tests need CUDA, downloaded checkpoints, or local LeRobot datasets. LIBERO batch evaluation additionally assumes Linux `ss` is available because [scripts/run/eval_libero.sh](scripts/run/eval_libero.sh) uses it to wait for the policy-server port.
 
 ## Acknowledgements
 
@@ -327,33 +413,26 @@ For avoidance of doubt, there are two licensing boundaries, each determined by t
 - Boundary 2 (G0 PLUS / G0.5): First commit under the G0.5 license (introducing the G0.5 license switch): [dc0a1ef](https://github.com/OpenGalaxea/GalaxeaVLA/tree/dc0a1ef4531256adea4ee9f3d7d2fa44613cb866)
 In the event of any inconsistency between the date descriptions and the commit hashes, the commit hashes shall prevail.
 
-### What you can do under the G05 Community License
+### What you can do under the G0.5 Community License
 
 You may use, reproduce, modify, and distribute the G0.5 materials only for non-commercial purposes, such as academic research, personal use, education, and evaluation. Commercial use (including production deployment, providing services to third parties, or productization) requires a separate commercial license from us.
-Notices and attribution
+
+The G0.5 materials include model code, weights, configurations, training/inference scripts, documentation, and accompanying materials. See [LICENSE-G0.5](./LICENSE-G0.5) and [licenses/LICENSE-G0.5](licenses/LICENSE-G0.5).
+
+### Notices and attribution
+
 If you redistribute any part of the G0.5 materials, you must include:
-- a copy/link of G0.5 Community License Agreement, and
+- a copy/link of the G0.5 Community License Agreement,
 - the NOTICE file in this repository, and
 - prominent notices on modified files indicating changes.
 
-This repository is released under the **G05 Community License Agreement (Non-Commercial + Limited Patent License)**. See [LICENSE](./LICENSE).
-
-The G05 materials include model code, weights, configurations, training/inference scripts, documentation, and accompanying materials.
-
 ### Third-party licenses
 
-G05 uses Qwen3.5 as its pretrained VLM backbone and includes Qwen3.5-derived implementation components. Qwen3.5 model weights, configuration files, and related upstream materials are licensed by Qwen under Apache License 2.0. See [LICENSE_QWEN3_5.txt](./LICENSE_QWEN3_5.txt).
+G0.5 uses Qwen3.5 as its pretrained VLM backbone and includes Qwen3.5-derived implementation components. Qwen3.5 model weights, configuration files, and related upstream materials are licensed by Qwen under Apache License 2.0. See [LICENSE_QWEN3_5.txt](./LICENSE_QWEN3_5.txt).
 
 ### Legal and safety compliance
 
 This repository release does not itself provide a public-facing generative AI service. If you deploy, fine-tune, redistribute, or expose any model, service, output, or robot-control workflow, you are responsible for complying with applicable laws and regulations, including requirements for data rights, personal information protection, safety assessment or filing, content safety, generated-content labeling, and robotics safety in your jurisdiction.
-
-### Notices and attribution
-
-If you redistribute any part of the G05 materials, you must include:
-- a copy/link of the G05 Community License Agreement,
-- the required NOTICE text/file described in the license, and
-- prominent notices on modified files indicating changes.
 
 ## Star History
 
