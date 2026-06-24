@@ -17,9 +17,9 @@
 
 [Jun 17, 2026] We release the [checkpoint](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101) of **G0.5** for zero-shot inference deployment on so-100/101.
 
-[Jun 16, 2026] We provide zero-shot inference deployment entrypoints for the **G0.5** model on the R1 Lite and DROID embodiment, along with a LIBERO simulation evaluation entrypoint and R1 Lite/R1 Pro post-training fine-tuning support. Post-training support for more simulation benchmarks and zero-shot inference deployment on so100/101 will be released soon.
+[Jun 16, 2026] We provide zero-shot inference deployment entrypoints for the **G0.5** model on the R1 Lite and DROID embodiment, along with a LIBERO simulation evaluation entrypoint and R1 Lite/R1 Pro post-training fine-tuning support. Evaluation support for more simulation benchmarks will be released soon.
 
-[Jun 1, 2026] We introduce **G0.5**, our latest autoregressive VLA model with state-of-the-art performance. See the [Project Page](https://opengalaxea.github.io/G05/). Model weights and code are coming soon.
+[Jun 1, 2026] We introduce **G0.5**, our latest autoregressive VLA model with state-of-the-art performance. See the [Project Page](https://opengalaxea.github.io/G05/).
 
 [Feb 12, 2026] Updated **G0Plus** pretrained weights trained on larger-scale teleoperation and web data. Released **G0Tiny** (250M, SmolVLM2 backbone) for R1 Pro Orin edge deployment. Added out-of-the-box demos: **Fold Towels** and **Handover Gift** (on-device G0Tiny inference via TensorRT at up to 10 Hz). Added [openpi](https://github.com/Physical-Intelligence/openpi)-based **pi0/pi0fast** fine-tuning support.
 

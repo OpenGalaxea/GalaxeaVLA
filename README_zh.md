@@ -17,9 +17,9 @@
 
 [2026 年 6 月 17 日] 我们提供了 **G0.5** 在 so-100/101 本体上零样本推理部署的[权重](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101)。
 
-[2026 年 6 月 16 日] 我们提供了 **G0.5** 模型在 R1 Lite 和 DROID 本体上的零样本推理部署入口，并提供 LIBERO 仿真评测入口和 R1 Lite/R1 Pro 后训练微调支持。更多仿真 benchmark 的后训练微调功能，以及 so100/101 本体的零样本推理部署入口将很快更新。
+[2026 年 6 月 16 日] 我们提供了 **G0.5** 模型在 R1 Lite 和 DROID 本体上的零样本推理部署入口，并提供 LIBERO 仿真评测入口和 R1 Lite/R1 Pro 后训练微调支持。更多仿真 benchmark 的评测功能将很快更新。
 
-[2026 年 6 月 1 日] 我们发布 **G0.5**，这是最新的自回归 VLA 模型，具备领先性能。请查看[项目主页](https://opengalaxea.github.io/G05/)。模型权重和代码即将发布。
+[2026 年 6 月 1 日] 我们发布 **G0.5**，这是最新的自回归 VLA 模型，具备领先性能。请查看[项目主页](https://opengalaxea.github.io/G05/)。
 
 [2026 年 2 月 12 日] 更新了在更大规模遥操作和网页数据上训练的 **G0Plus** 预训练权重。发布 **G0Tiny**（250M，SmolVLM2 骨干网络），用于 R1 Pro Orin 边缘部署。新增开箱即用的演示任务：**Fold Towels** 和 **Handover Gift**（通过 TensorRT 在设备端运行 G0Tiny 推理，最高 10 Hz）。新增基于 [openpi](https://github.com/Physical-Intelligence/openpi) 的 **pi0/pi0fast** 微调支持。
 
