@@ -1,0 +1,24 @@
+policy_name: galaxeafm_policy
+task_name: null
+task_config: null
+ckpt_setting: null
+seed: 0
+instruction_type: seen
+eval_num_episodes: 100
+
+sim_cfg_path: null
+sim_task: null
+sim_cfg_name: sim_robotwin.yaml
+mixed_precision: bf16
+device: cuda
+dataset_stats_path: null
+action_horizon: null
+replan_steps: 8
+num_inference_steps: 10
+sigma_shift: null
+text_cfg_scale: 1.0
+negative_prompt: ""
+rand_device: cpu
+tiled: false
+timing_enabled: false
+skip_get_obs_within_replan: false

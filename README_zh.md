@@ -15,9 +15,11 @@
 
 ## 📢 最新动态
 
-[2026 年 6 月 17 日] 我们提供了 **G0.5** 在 so-100/101 本体上零样本推理部署的[权重](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101)。
+[2026 年 6 月 29 日] 我们新增 **G0.5** RoboTwin 2.0 评测支持，包括评测入口和 `g05-robotwin20` [权重](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-robotwin20)。更多仿真 benchmark 的评测功能将很快更新。
 
-[2026 年 6 月 16 日] 我们提供了 **G0.5** 模型在 R1 Lite 和 DROID 本体上的零样本推理部署入口，并提供 LIBERO 仿真评测入口和 R1 Lite/R1 Pro 后训练微调支持。更多仿真 benchmark 的评测功能将很快更新。
+[2026 年 6 月 17 日] 我们提供了 **G0.5** 在 so-100/101 本体上零样本推理部署的 `g05-so101` [权重](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101)。
+
+[2026 年 6 月 16 日] 我们提供了 **G0.5** 模型在 R1 Lite 和 DROID 本体上的零样本推理部署入口，并提供 LIBERO 仿真评测入口和 R1 Lite/R1 Pro 后训练微调支持。
 
 [2026 年 6 月 1 日] 我们发布 **G0.5**，这是最新的自回归 VLA 模型，具备领先性能。请查看[项目主页](https://opengalaxea.github.io/G05/)。
 
@@ -176,13 +178,17 @@ checkpoints/
 │   ├── .hydra/config.yaml
 │   ├── checkpoints/model_state_dict.pt
 │   └── dataset_stats.json
-└── g05-libero/
+├── g05-libero/
+│   ├── .hydra/config.yaml
+│   ├── model.pt
+│   └── dataset_stats.json
+└── g05-robotwin20/
     ├── .hydra/config.yaml
-    ├── model.pt
+    ├── checkpoints/model_state_dict.pt
     └── dataset_stats.json
 ```
 
-完整权重约 44 GB。每个 G0.5 模型检查点约 11 GB，共享的 `action_tokenizer.pt` 约 484 MB，`qwen3_5_2b_base_processor/` 约 22 MB。
+包含 RoboTwin checkpoint 时，完整权重约 55 GB。每个 G0.5 模型检查点约 11 GB，共享的 `action_tokenizer.pt` 约 484 MB，`qwen3_5_2b_base_processor/` 约 22 MB。
 
 | 模型 | 用途 | 本地 `--ckpt_path` |
 | ---- | ---- | ------------------ |
@@ -190,8 +196,9 @@ checkpoints/
 | [G05-so101](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101) | SO-100/101 零样本部署 | `checkpoints/g05-so101/checkpoints/model_state_dict.pt` |
 | [G05-droid](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-droid) | DROID 零样本部署 | `checkpoints/g05-droid/checkpoints/model_state_dict.pt` |
 | [G05-libero](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-libero) | LIBERO 评测 | `checkpoints/g05-libero/model.pt` |
+| [G05-robotwin20](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-robotwin20) | RoboTwin 2.0 评测 | `checkpoints/g05-robotwin20/checkpoints/model_state_dict.pt` |
 
-请保留每个 checkpoint 旁边的 `.hydra/config.yaml` 和 `dataset_stats.json`。推理和评测入口会从 checkpoint 所在 run 目录解析 `dataset_stats.json`，配置默认使用 `checkpoints/qwen3_5_2b_base_processor` 作为共享 processor，并使用 `checkpoints/action_tokenizer.pt` 作为共享 action tokenizer。
+请保留每个 checkpoint 旁边的 `.hydra/config.yaml` 和 `dataset_stats.json`。推理和评测入口会从 checkpoint 父目录向上解析 `dataset_stats.json`，配置默认使用 `checkpoints/qwen3_5_2b_base_processor` 作为共享 processor，并使用 `checkpoints/action_tokenizer.pt` 作为共享 action tokenizer。
 
 LIBERO 导出的配置会引用 bundle 内部 sidecar。下面的 `eval_libero.sh` 命令依赖这些路径。如果下载工具没有生成这些文件，请创建软链接：
 
@@ -284,6 +291,23 @@ bash scripts/run/eval_libero.sh checkpoints/g05-libero/model.pt \
 默认情况下，脚本会评测 `libero_goal`、`libero_spatial`、`libero_object` 和 `libero_10`，然后把每个 suite 的日志和 `summary.json` 写入 `outputs/libero_eval_<checkpoint_name>/`。使用 `--suites "libero_goal libero_10"` 可以只运行子集；需要时也可以追加 Hydra 风格的 override，例如 `model.model_arch.discrete_action=false`。
 
 LIBERO 安装说明、生成的路径配置、输出布局和单 suite 调试命令见 [experiments/libero/README.md](experiments/libero/README.md)。
+
+### RoboTwin 评测
+
+RoboTwin 评测运行在 RoboTwin 仿真器中，需要额外的仿真依赖和 assets。它使用单独的 `.venv-robotwin` 环境，避免仿真器所需的 `sapien` 3.x 覆盖主仓库环境。请按照 [experiments/robotwin/README_zh.md](experiments/robotwin/README_zh.md) 克隆 RoboTwin、下载 assets、创建 `.venv-robotwin`，并完成渲染验证。
+
+全量 RoboTwin 任务集评测命令：
+
+```bash
+.venv-robotwin/bin/python -u experiments/robotwin/run_robotwin_manager.py \
+    task=robotwin \
+    ckpt=checkpoints/g05-robotwin20/checkpoints/model_state_dict.pt \
+    EVALUATION.robotwin_root=third_party/RoboTwin \
+    MULTIRUN.num_gpus=8 \
+    MULTIRUN.max_tasks_per_gpu=1
+```
+
+该命令会使用配置中的 episode 数量评测 RoboTwin `_eval_step_limit.yml` 中的全部任务。标准 `g05-robotwin20` 目录结构下，`dataset_stats.json` 会自动从 checkpoint 父目录向上解析；只有 stats 文件放在其他位置时，才需要传 `EVALUATION.dataset_stats_path=/path/to/dataset_stats.json`。汇总结果写入 `evaluate_results/robotwin/<ckpt_tag>/<timestamp>/`，RoboTwin 渲染视频保留在 `third_party/RoboTwin/eval_result/`。
 
 ### 🔥 在 Galaxea 机器人上微调基础模型
 

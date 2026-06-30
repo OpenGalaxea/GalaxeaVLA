@@ -1,0 +1,43 @@
+# @package _global_
+
+defaults:
+  - train
+  - _self_
+
+ckpt: null
+gpu_id: 0
+
+EVALUATION:
+  robotwin_root: third_party/RoboTwin
+  policy_name: galaxeafm_policy
+  task_name: null
+  task_config: demo_randomized
+  instruction_type: seen
+  eval_num_episodes: 50
+  output_dir: ./evaluate_results/robotwin/${hydra:runtime.choices.task}/${now:%Y%m%d_%H%M%S}
+
+  action_horizon: null
+  replan_steps: 24
+  num_inference_steps: ${model.model_arch.fm.num_inference_steps}
+  sigma_shift: null
+  text_cfg_scale: 1.0
+  negative_prompt: ""
+  rand_device: cpu
+  tiled: false
+  timing_enabled: false
+  skip_get_obs_within_replan: true
+
+  dataset_stats_path: null
+  device: cuda
+
+MULTIRUN:
+  enabled: false
+  num_gpus: 8
+  max_tasks_per_gpu: 2
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: .
+  output_subdir: null
