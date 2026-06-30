@@ -15,9 +15,11 @@
 
 ## 📢 News
 
-[Jun 17, 2026] We release the [checkpoint](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101) of **G0.5** for zero-shot inference deployment on so-100/101.
+[Jun 29, 2026] We add **G0.5** RoboTwin 2.0 evaluation support, including the RoboTwin 2.0 evaluation entrypoint and the `g05-robotwin20` [checkpoint](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-robotwin20) layout. Evaluation support for more simulation benchmarks will be released soon.
 
-[Jun 16, 2026] We provide zero-shot inference deployment entrypoints for the **G0.5** model on the R1 Lite and DROID embodiment, along with a LIBERO simulation evaluation entrypoint and R1 Lite/R1 Pro post-training fine-tuning support. Evaluation support for more simulation benchmarks will be released soon.
+[Jun 17, 2026] We release the `g05-so101` [checkpoint](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101) of **G0.5** for zero-shot inference deployment on so-100/101.
+
+[Jun 16, 2026] We provide zero-shot inference deployment entrypoints for the **G0.5** model on the R1 Lite and DROID embodiment, along with a LIBERO simulation evaluation entrypoint and R1 Lite/R1 Pro post-training fine-tuning support. 
 
 [Jun 1, 2026] We introduce **G0.5**, our latest autoregressive VLA model with state-of-the-art performance. See the [Project Page](https://opengalaxea.github.io/G05/).
 
@@ -156,7 +158,7 @@ huggingface-cli download OpenGalaxea/G05 \
     --local-dir-use-symlinks False
 ```
 
-Expected local layout after download:
+Expected local layout after downloading available checkpoints and placing any separately distributed RoboTwin checkpoint:
 
 ```text
 checkpoints/
@@ -174,13 +176,17 @@ checkpoints/
 │   ├── .hydra/config.yaml
 │   ├── checkpoints/model_state_dict.pt
 │   └── dataset_stats.json
-└── g05-libero/
+├── g05-libero/
+│   ├── .hydra/config.yaml
+│   ├── model.pt
+│   └── dataset_stats.json
+└── g05-robotwin20/
     ├── .hydra/config.yaml
-    ├── model.pt
+    ├── checkpoints/model_state_dict.pt
     └── dataset_stats.json
 ```
 
-The full set is about 44 GB. Each G0.5 model checkpoint is about 11 GB, the shared `action_tokenizer.pt` is about 484 MB, and `qwen3_5_2b_base_processor/` is about 22 MB.
+With the RoboTwin checkpoint included, the full set is about 55 GB. Each G0.5 model checkpoint is about 11 GB, the shared `action_tokenizer.pt` is about 484 MB, and `qwen3_5_2b_base_processor/` is about 22 MB.
 
 | Model | Use | Local `--ckpt_path` |
 | ----- | --- | ------------------- |
@@ -188,8 +194,11 @@ The full set is about 44 GB. Each G0.5 model checkpoint is about 11 GB, the shar
 | [G05-so101](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-so101) | SO-100/101 zero-shot deployment | `checkpoints/g05-so101/checkpoints/model_state_dict.pt` |
 | [G05-droid](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-droid) | DROID zero-shot deployment | `checkpoints/g05-droid/checkpoints/model_state_dict.pt` |
 | [G05-libero](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-libero) | LIBERO evaluation | `checkpoints/g05-libero/model.pt` |
+| [G05-robotwin20](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-robotwin20) | RoboTwin 2.0 evaluation | `checkpoints/g05-robotwin20/checkpoints/model_state_dict.pt` |
 
-Keep each checkpoint's `.hydra/config.yaml` and `dataset_stats.json` next to the downloaded weights. The inference and evaluation entrypoints resolve `dataset_stats.json` from the checkpoint run directory, and the configs expect the shared processor at `checkpoints/qwen3_5_2b_base_processor` and the shared tokenizer at `checkpoints/action_tokenizer.pt`.
+Keep each checkpoint's `.hydra/config.yaml` and `dataset_stats.json` next to the downloaded weights. The inference and evaluation entrypoints resolve `dataset_stats.json` from the checkpoint parent directories, and the configs expect the shared processor at `checkpoints/qwen3_5_2b_base_processor` and the shared tokenizer at `checkpoints/action_tokenizer.pt`.
+
+The RoboTwin checkpoint uses the same sidecar layout. If `g05-robotwin20` is distributed separately from the public Hugging Face snapshot, place it under `checkpoints/g05-robotwin20/` exactly as shown above before running evaluation.
 
 For LIBERO, the exported config expects bundle-local sidecars. The `eval_libero.sh` command below requires these paths. If they are not included by your download tool, create symlinks:
 
@@ -282,6 +291,23 @@ bash scripts/run/eval_libero.sh checkpoints/g05-libero/model.pt \
 By default, the script evaluates `libero_goal`, `libero_spatial`, `libero_object`, and `libero_10`, then writes per-suite logs and `summary.json` under `outputs/libero_eval_<checkpoint_name>/`. Use `--suites "libero_goal libero_10"` to run a subset, and append Hydra-style overrides such as `model.model_arch.discrete_action=false` when needed.
 
 See [experiments/libero/README.md](experiments/libero/README.md) for LIBERO installation notes, generated path config, output layout, and single-suite debugging commands.
+
+### Evaluation on RoboTwin
+
+RoboTwin evaluation runs inside the RoboTwin simulator and requires extra simulation dependencies and assets. It uses a separate `.venv-robotwin` environment so the simulator's `sapien` 3.x dependency does not overwrite the main repository environment. Follow [experiments/robotwin/README.md](experiments/robotwin/README.md) to clone RoboTwin, download assets, create `.venv-robotwin`, and verify rendering.
+
+Run the full RoboTwin task set:
+
+```bash
+.venv-robotwin/bin/python -u experiments/robotwin/run_robotwin_manager.py \
+    task=robotwin \
+    ckpt=checkpoints/g05-robotwin20/checkpoints/model_state_dict.pt \
+    EVALUATION.robotwin_root=third_party/RoboTwin \
+    MULTIRUN.num_gpus=8 \
+    MULTIRUN.max_tasks_per_gpu=1
+```
+
+This evaluates every task listed in RoboTwin's `_eval_step_limit.yml` with the configured episode count. `dataset_stats.json` is resolved automatically from the checkpoint parent directories for the standard `g05-robotwin20` layout. Pass `EVALUATION.dataset_stats_path=/path/to/dataset_stats.json` only when the stats file lives elsewhere. Results are written under `evaluate_results/robotwin/<ckpt_tag>/<timestamp>/`, while RoboTwin-rendered videos remain under `third_party/RoboTwin/eval_result/`.
 
 ### 🔥 Fine-Tuning Base Models on Galaxea Robots
 
