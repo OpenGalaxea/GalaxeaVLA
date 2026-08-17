@@ -498,4 +498,4 @@ G0.5 使用 Qwen3.5 作为预训练 VLM 骨干模型，并包含 Qwen3.5 派生�
 
 ## Star 历史
 
-[![Star History Chart](https://api.star-history.com/svg?repos=OpenGalaxea/GalaxeaVLA&type=date&legend=top-left)](https://www.star-history.com/#OpenGalaxea/GalaxeaVLA&type=date&legend=top-left)
+[![Star History Chart](https://star-history.dera.page/svg?repos=OpenGalaxea/GalaxeaVLA&type=date&legend=top-left)](https://star-history.dera.page/#OpenGalaxea/GalaxeaVLA&type=date&legend=top-left)
