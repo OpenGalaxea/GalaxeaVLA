@@ -504,4 +504,4 @@ This repository release does not itself provide a public-facing generative AI se
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=OpenGalaxea/GalaxeaVLA&type=date&legend=top-left)](https://www.star-history.com/#OpenGalaxea/GalaxeaVLA&type=date&legend=top-left)
+[![Star History Chart](https://star-history.dera.page/svg?repos=OpenGalaxea/GalaxeaVLA&type=date&legend=top-left)](https://star-history.dera.page/#OpenGalaxea/GalaxeaVLA&type=date&legend=top-left)
