@@ -192,6 +192,26 @@ def collate_fn_pad_sequences(batch, padding_input_id: int = 0):
         {key: item.get(key) for key in sample_meta_keys if key in item} for item in batch
     ]
 
+    token_pad_values = {
+        "input_ids": padding_input_id,
+        "labels": -100,
+        "attention_mask": 0,
+    }
+    for key, padding_value in token_pad_values.items():
+        sequences = [item.get(key) for item in batch]
+        if not all(
+            isinstance(sequence, torch.Tensor) and sequence.ndim == 1 for sequence in sequences
+        ):
+            continue
+        if len({sequence.shape[0] for sequence in sequences}) == 1:
+            continue
+
+        padded_sequences = pad_sequence(
+            sequences, batch_first=True, padding_value=padding_value
+        )
+        for item, sequence in zip(batch, padded_sequences):
+            item[key] = sequence
+
     try:
         batch_collated.update(default_collate(batch))
     except RuntimeError as e:
