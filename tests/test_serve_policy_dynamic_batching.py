@@ -6,6 +6,7 @@ import pytest
 import torch
 
 from g05.models.g05.inferencer import PolicyInferencer
+from g05.utils.data.data_utils import collate_fn_pad_sequences
 
 
 class FakeProcessor:
@@ -50,6 +51,31 @@ def _make_obs(idx: int, tokens: list[int]) -> dict:
         "proprio": torch.tensor([[float(idx), float(idx + 1)]], dtype=torch.float32),
         "action_horizon": 1,
     }
+
+
+def test_collate_right_pads_variable_length_token_fields():
+    batch = [
+        {
+            "input_ids": torch.tensor([11, 12], dtype=torch.long),
+            "labels": torch.tensor([21, 22], dtype=torch.long),
+            "attention_mask": torch.tensor([4.0, 4.0]),
+            "pixel_values": torch.tensor([1.0]),
+        },
+        {
+            "input_ids": torch.tensor([13, 14, 15], dtype=torch.long),
+            "labels": torch.tensor([23, 24, 25], dtype=torch.long),
+            "attention_mask": torch.tensor([4.0, 4.0, 4.0]),
+            "pixel_values": torch.tensor([2.0]),
+        },
+    ]
+
+    collated = collate_fn_pad_sequences(batch, padding_input_id=99)
+
+    assert torch.equal(collated["input_ids"], torch.tensor([[11, 12, 99], [13, 14, 15]]))
+    assert torch.equal(collated["labels"], torch.tensor([[21, 22, -100], [23, 24, 25]]))
+    assert torch.equal(
+        collated["attention_mask"], torch.tensor([[4.0, 4.0, 0.0], [4.0, 4.0, 4.0]])
+    )
 
 
 @pytest.fixture(autouse=True)
