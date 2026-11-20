@@ -176,7 +176,14 @@ async def run_parallel_task(
 
     init_states = []
     for i in range(num_parallel):
-        _, state = assign_trial(i)
+        if next_trial_idx < num_trials:
+            _, state = assign_trial(i)
+        else:
+            # More parallel envs than trials (num_parallel > num_trials): keep
+            # the extra envs idle so they do not run, and count, episodes
+            # beyond num_trials. They still need an init state for the reset.
+            env_trial_id[i] = -1
+            state = initial_states[0]
         init_states.append(state)
 
     await asyncio.to_thread(vec_env.reset)
